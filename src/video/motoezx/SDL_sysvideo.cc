@@ -227,7 +227,7 @@ extern "C" {
 		// Fill in some window manager capabilities
 		_this->info.wm_available = 0;
 		_this->info.hw_available = 1;
-		_this->info.video_mem = 3*1024*1024;
+		_this->info.video_mem = 1*1024*1024;//Previously. After initializing the IPU will specify
 		
 		// We're done!
 		return 0;
@@ -246,8 +246,13 @@ extern "C" {
 		return(modes);
 	}
 
-	extern bool getFreeIPUMem( unsigned int * len, unsigned  int * start );
 	extern bool isRotate();
+	extern bool isScalling();
+	extern unsigned int iIPUMemSize;
+	extern unsigned int iIPUMemStart;
+	extern unsigned int iIPUMemFreeSize;
+	extern unsigned int iIPUMemFreeStart;
+	extern unsigned int iFBMemSize;
 	
 	/* FIXME: check return values and cleanup here */
 	SDL_Surface *MAGX_SetVideoMode(_THIS, SDL_Surface *current,
@@ -268,7 +273,7 @@ extern "C" {
 		}
 		
 		if ( flags & SDL_HWSURFACE ) 
-			printf("SDL request HW!\n");
+			printf("MAGX: SDL request HW!\n");
 
 		if ( !SDL_Win->SetVideoMode(width, height, bpp) )
 		{
@@ -293,11 +298,11 @@ extern "C" {
 			else
 				_this->UpdateRects = MAGX_NoUpdate;			
 		}
-		
-		getFreeIPUMem( &ipuMemStart, &ipuMemFree );
+
+		_this->info.video_mem = iIPUMemSize;
 		
 		MAGX_FreeHWSurfaces(_this);
-		MAGX_InitHWSurfaces(_this, current, (char*)ipuMemStart, ipuMemFree);
+		MAGX_InitHWSurfaces(_this, current, (char*)iIPUMemFreeStart, iIPUMemFreeSize);
 		
 		// We're done
 		return(current);
@@ -353,7 +358,7 @@ extern "C" {
 		surfaces.used = 1;
 		surfaces.dirty = 0;
 		surfaces.base = (char*)screen->pixels;
-		surfaces.size = 240*320*3; //(unsigned int)((long)base - (long)surfaces.base);
+		surfaces.size = iFBMemSize;
 		surfaces.next = bucket;
 		screen->hwdata = (struct private_hwdata *)&surfaces;
 		return(0);
@@ -375,6 +380,8 @@ extern "C" {
 
 	static int MAGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 	{
+		printf("MAGX: alloc surface!!!!!!!\n"); fflush(stdout);
+		
 		vidmem_bucket *bucket;
 		int size;
 		int extra;
@@ -391,9 +398,7 @@ extern "C" {
 		}
 		surface->pitch = SDL_VideoSurface->pitch;
 		size = surface->h * surface->pitch;
-		#ifdef FBCON_DEBUG
-		fprintf(stderr, "Allocating bucket of %d bytes\n", size);
-		#endif
+		printf("MAGX: Allocating bucket of %d bytes\n", size);
 
 		/* Quick check for available mem */
 		if ( size > surfaces_memleft ) 
@@ -419,10 +424,7 @@ extern "C" {
 		if ( extra ) 
 		{
 			vidmem_bucket *newbucket;
-
-			#ifdef FBCON_DEBUG
-			fprintf(stderr, "Adding new free bucket of %d bytes\n", extra);
-			#endif
+			printf("MAGX: Adding new free bucket of %d bytes\n", extra);
 			newbucket = (vidmem_bucket *)SDL_malloc(sizeof(*newbucket));
 			if ( newbucket == NULL ) 
 			{
@@ -443,9 +445,7 @@ extern "C" {
 		bucket->used = 1;
 		bucket->size = size;
 		bucket->dirty = 0;
-		#ifdef FBCON_DEBUG
-		fprintf(stderr, "Allocated %d bytes at %p\n", bucket->size, bucket->base);
-		#endif
+		printf("MAGX: Allocated %d bytes at %p\n", bucket->size, bucket->base);
 		surfaces_memleft -= size;
 		surface->flags |= SDL_HWSURFACE;
 		surface->pixels = bucket->base;
@@ -467,18 +467,14 @@ extern "C" {
 		if ( bucket && bucket->used ) 
 		{
 			/* Add the memory back to the total */
-			#ifdef DGA_DEBUG
-			printf("Freeing bucket of %d bytes\n", bucket->size);
-			#endif
+			printf("MAGX: Freeing bucket of %d bytes\n", bucket->size);
 			surfaces_memleft += bucket->size;
 
 			/* Can we merge the space with surrounding buckets? */
 			bucket->used = 0;
 			if ( bucket->next && ! bucket->next->used ) 
 			{
-				#ifdef DGA_DEBUG
-				printf("Merging with next bucket, for %d total bytes\n", bucket->size+bucket->next->size);
-				#endif
+				printf("MAGX: Merging with next bucket, for %d total bytes\n", bucket->size+bucket->next->size);
 				freeable = bucket->next;
 				bucket->size += bucket->next->size;
 				bucket->next = bucket->next->next;
@@ -488,9 +484,7 @@ extern "C" {
 			}
 			if ( bucket->prev && ! bucket->prev->used ) 
 			{
-				#ifdef DGA_DEBUG
-				printf("Merging with previous bucket, for %d total bytes\n", bucket->prev->size+bucket->size);
-				#endif
+				printf("MAGX: Merging with previous bucket, for %d total bytes\n", bucket->prev->size+bucket->size);
 				freeable = bucket;
 				bucket->prev->size += bucket->size;
 				bucket->prev->next = bucket->next;

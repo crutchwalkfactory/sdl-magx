@@ -246,11 +246,21 @@ static int in_width = 0;
 
 static int fd_pp;
 static int pp_dma_count=0;
-static char * pp_dma_buffer[200];
-static pp_buf pp_desc[200];
+static char * pp_dma_buffer[2];
+static pp_buf pp_desc[2];
 
 static pp_buf pp_frame;
 static char * pp_frame_buffer = NULL;
+
+extern "C" 
+{
+unsigned int iIPUMemSize;
+unsigned int iIPUMemStart;
+unsigned int iIPUMemFreeSize;
+unsigned int iIPUMemFreeStart;
+
+unsigned int iFBMemSize;
+};
 
 static int initFB()
 {
@@ -278,6 +288,7 @@ static int initFB()
 	pp_frame.index = -1;
 	pp_frame.size = fb_finfo.smem_len;
 	pp_frame.addr = fb_finfo.smem_start;
+	iFBMemSize = fb_finfo.smem_len;
 	
 	if ((pp_frame_buffer = (char*)mmap(0, p_width*p_height*hw_pixel_size, PROT_READ | PROT_WRITE,
 				 MAP_SHARED, fb_dev_fd, 0)) == MAP_FAILED) 
@@ -300,10 +311,16 @@ err_out:
 
 extern "C" bool isRotate()
 {
-	return ((width < height)!=(p_width < p_height));
+	return ((in_width < in_height)!=(p_width < p_height));
 }
 
-extern "C" bool getFreeIPUMem( unsigned int * len, unsigned  int * start )
+extern "C" bool isScalling()
+{
+	return (( !isRotate() && (in_width>p_width || in_height>p_height) ) ||
+			(  isRotate() && (in_width>p_height || in_height>p_width) )  );
+}
+
+static bool getIPUMem()
 {
 	int fb;
 	
@@ -317,26 +334,14 @@ extern "C" bool getFreeIPUMem( unsigned int * len, unsigned  int * start )
 	if (ioctl(fb, FBIOGET_FSCREENINFO, &finfo)) 
 	{
 		printf("MAGX_VO: Can't get FSCREENINFO: %s\n", strerror(errno));
-		*len=0;
-		*start=0;
 		return 0;
 	}	
 
-	// IPU alloc of memory: 
-	//	Z6 - 5M
-	//	VE66 - 3M
-	//	E8 - 1M
-	//	ZN5 - 2M
-	
-	*len=3*1024*1024-pp_dma_count*pp_desc[0].size;
-	if ( *len<0 ) *len=0;
-	*start = (((unsigned int)finfo.smem_start)+pp_dma_count*pp_desc[0].size);
-	
-	printf("MAGX_VO: Free HW mem %u@%p\n", *len, (void*)(*start) );
-	
+	iIPUMemFreeStart=iIPUMemStart = ((unsigned int)finfo.smem_start);
+
 	close(fb);
 	
-	return (len>0);
+	return (iIPUMemFreeStart!=0);
 }
 
 static int setBppFB( uint32_t in_bpp )
@@ -435,7 +440,7 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 		if ((fd_pp = open("/dev/mxc_ipu_pp", O_RDWR, 0)) < 0) 
 		{
 			perror("MAGX_VO: open(/dev/mxc_ipu_pp)\n");
-			goto err_1;
+			return 0;
 		}
 	}
 	
@@ -501,56 +506,81 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 
 	if (ioctl(fd_pp, PP_IOCTL_INIT, &pp_init) < 0) 
 	{
-			perror("MAGX_VO: PP_IOCTL_INIT");
-			goto err_1;
+		perror("MAGX_VO: PP_IOCTL_INIT");
+		return 0;
 	}
 
-	pp_reqbufs.count = pp_dma_count;
+	//Alloc all IPU memory
+	pp_reqbufs.count = 1;
+
+	bool bMemAllowed=true;
+	iIPUMemSize=0;
+
+	for ( int i=5;i>0;i-- )
+	{
+		pp_reqbufs.req_size = i*1024*1024;
 	
-	/* Target size, the whole frame buffer */
-	pp_reqbufs.req_size = p_width*p_height*vo_pixel_size;
-	if (pp_reqbufs.req_size < (vwidth*vheight*in_pixel_size))
-		pp_reqbufs.req_size = (vwidth*vheight*in_pixel_size);
+		//Try alloc memory
+		bMemAllowed = (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs)==0);
 
-	if (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs) != 0) 
-	{
-			perror("MAGX_VO: PP_IOCTL_REQBUFS");
-			goto err_1;
+		if ( bMemAllowed )
+		{
+			iIPUMemFreeSize=iIPUMemSize=pp_reqbufs.req_size;
+			break;
+		}
 	}
-
-	for (i = 0; i < pp_reqbufs.count; i++) 
+	printf("MAGX_VO: IPU memory: %uM\n", iIPUMemSize/(1024*1024));
+	
+	getIPUMem();
+	
+	if ( pp_dma_count>0 )
 	{
-			pp_desc[i].index = i;
-			if (ioctl(fd_pp, PP_IOCTL_QUERYBUF, &pp_desc[i]) != 0) 
-			{
-					perror("MAGX_VO: PP_IOCTL_QUERYBUF failed");
-					goto err_1;
-			}
-
-			pp_dma_buffer[i] = (char*)mmap (NULL, pp_desc[i].size, 
-								PROT_READ | PROT_WRITE, MAP_SHARED, 
-									fd_pp, pp_desc[i].addr);
-			if (pp_dma_buffer[i] == MAP_FAILED) 
-			{
-				printf("max %d\n", i);
-					perror("MAGX_VO: mmap IPU");
-					goto err_1;
-			}
-			
-			memset(pp_dma_buffer[i], 0, pp_desc[i].size);
+		pp_desc[0].index = -1;
+		pp_desc[0].size = vwidth*vheight*in_pixel_size;
+		if ( iIPUMemFreeSize<pp_desc[0].size )
+		{
+			perror("MAGX_VO: No memory for preFB!");
+			return 0;
+		}
+		pp_desc[0].addr = iIPUMemFreeStart;
+		iIPUMemFreeStart += pp_desc[0].size;
+		iIPUMemFreeSize -= pp_desc[0].size;
 	}
+	
 	if ( pp_dma_count>1 )
+	{
+		printf("MAGX_VO: Init mem for rotate!\n");
+		pp_desc[1].index = -2;
 		pp_desc[1].size = p_width*p_height*vo_pixel_size;
+		if ( iIPUMemFreeSize<pp_desc[1].size )
+		{
+			perror("MAGX_VO: No memory for rotate buffer!");
+			return 0;
+		}
+		pp_desc[1].addr = iIPUMemFreeStart;
+		iIPUMemFreeStart += pp_desc[1].size;
+		iIPUMemFreeSize -= pp_desc[1].size;
+	}
+	
+	for (i = 0; i < pp_dma_count; i++) 
+	{
+		pp_dma_buffer[i] = (char*)mmap (NULL, pp_desc[i].size, 
+							PROT_READ | PROT_WRITE, MAP_SHARED, 
+								fd_pp, pp_desc[i].addr);
+		if (pp_dma_buffer[i] == MAP_FAILED) 
+		{
+			perror("MAGX_VO: mmap IPU");
+			return 0;
+		}
+		
+		memset(pp_dma_buffer[i], 0, pp_desc[i].size);
+	}
 
 	printf("MAGX_VO: IPU inited!\n");
 	
 	vo_inited=1;
 	
 	return 1;
-
-err_1:
-	ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo);
-	return 0;
 }
 
 static void uninit()
