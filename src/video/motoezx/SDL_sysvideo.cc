@@ -54,17 +54,24 @@ extern "C" {
 	static void MAGX_VideoQuit(_THIS);
 
 	static void MAGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects);
+	static void MAGX_NoUpdate(_THIS, int numrects, SDL_Rect *rects){};
 
-	// Hardware surface functions (now not uses)
+	// Hardware surface functions - alloc surface in IPU memory
 	static int MAGX_AllocHWSurface(_THIS, SDL_Surface *surface);
 	static int MAGX_LockHWSurface(_THIS, SDL_Surface *surface);
 	static void MAGX_UnlockHWSurface(_THIS, SDL_Surface *surface);
 	static void MAGX_FreeHWSurface(_THIS, SDL_Surface *surface);
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface);
 
+	static void MAGX_FreeHWSurfaces(_THIS);
+	static int MAGX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size);
+	
+	static unsigned int ipuMemStart=0;
+	static unsigned int ipuMemFree=0;	
+
+	#define FBCON_DEBUG
 
 	// FB driver bootstrap functions
-
 	static int MAGX_Available(void)
 	{
 		return(1);
@@ -126,6 +133,7 @@ extern "C" {
 		device->WarpWMCursor = MAGX_WarpWMCursor;
 		device->InitOSKeymap = MAGX_InitOSKeymap;
 		device->PumpEvents = MAGX_PumpEvents;
+		device->CreateYUVOverlay = NULL;
 
 		device->free = MAGX_DeleteDevice;
 		device->ToggleFullScreen = MAGX_ToggleFullScreen;
@@ -218,9 +226,11 @@ extern "C" {
 
 		// Fill in some window manager capabilities
 		_this->info.wm_available = 0;
-
+		_this->info.hw_available = 1;
+		_this->info.video_mem = 3*1024*1024;
+		
 		// We're done!
-		return(0);
+		return 0;
 	}
 
 	// We support any dimension at our bit-depth
@@ -236,6 +246,9 @@ extern "C" {
 		return(modes);
 	}
 
+	extern bool getFreeIPUMem( unsigned int * len, unsigned  int * start );
+	extern bool isRotate();
+	
 	/* FIXME: check return values and cleanup here */
 	SDL_Surface *MAGX_SetVideoMode(_THIS, SDL_Surface *current,
 							int width, int height, int bpp, Uint32 flags)
@@ -263,13 +276,28 @@ extern "C" {
 			return(NULL);
 		} 
 
-		current->flags = SDL_FULLSCREEN;
+		current->flags = SDL_FULLSCREEN | SDL_HWSURFACE;
 		current->w = width;
 		current->h = height;
 		current->pitch = SDL_CalculatePitch(current);
 		current->pixels = SDL_Win->getFBBuf();
-
-		_this->UpdateRects = MAGX_NormalUpdate;
+		
+		if ( isRotate() && ((flags|SDL_DOUBLEBUF)==SDL_DOUBLEBUF) )
+		{
+			current->flags |= SDL_DOUBLEBUF;
+			_this->UpdateRects = MAGX_NoUpdate;
+		} else
+		{
+			if ( isRotate() )
+				_this->UpdateRects = MAGX_NormalUpdate;
+			else
+				_this->UpdateRects = MAGX_NoUpdate;			
+		}
+		
+		getFreeIPUMem( &ipuMemStart, &ipuMemFree );
+		
+		MAGX_FreeHWSurfaces(_this);
+		MAGX_InitHWSurfaces(_this, current, (char*)ipuMemStart, ipuMemFree);
 		
 		// We're done
 		return(current);
@@ -297,24 +325,196 @@ extern "C" {
 	}
 
 	// We don't actually allow hardware surfaces other than the main one
+	static int MAGX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size)
+	{
+		vidmem_bucket *bucket;
+
+		surfaces_memtotal = size;
+		surfaces_memleft = size;
+
+		if ( surfaces_memleft > 0 ) 
+		{
+			bucket = (vidmem_bucket *)SDL_malloc(sizeof(*bucket));
+			if ( bucket == NULL ) 
+			{
+				SDL_OutOfMemory();
+				return(-1);
+			}
+			bucket->prev = &surfaces;
+			bucket->used = 0;
+			bucket->dirty = 0;
+			bucket->base = base;
+			bucket->size = size;
+			bucket->next = NULL;
+		} else
+			bucket = NULL;
+
+		surfaces.prev = NULL;
+		surfaces.used = 1;
+		surfaces.dirty = 0;
+		surfaces.base = (char*)screen->pixels;
+		surfaces.size = 240*320*3; //(unsigned int)((long)base - (long)surfaces.base);
+		surfaces.next = bucket;
+		screen->hwdata = (struct private_hwdata *)&surfaces;
+		return(0);
+	}
+	
+	static void MAGX_FreeHWSurfaces(_THIS)
+	{
+		vidmem_bucket *bucket, *freeable;
+
+		bucket = surfaces.next;
+		while ( bucket ) 
+		{
+			freeable = bucket;
+			bucket = bucket->next;
+			SDL_free(freeable);
+		}
+		surfaces.next = NULL;
+	}
+
 	static int MAGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 	{
-		return(-1);
+		vidmem_bucket *bucket;
+		int size;
+		int extra;
+
+		/* Temporarily, we only allow surfaces the same width as display.
+		Some blitters require the pitch between two hardware surfaces
+		to be the same.  Others have interesting alignment restrictions.
+		Until someone who knows these details looks at the code...
+		*/
+		if ( surface->pitch > SDL_VideoSurface->pitch ) 
+		{
+			SDL_SetError("Surface requested wider than screen");
+			return(-1);
+		}
+		surface->pitch = SDL_VideoSurface->pitch;
+		size = surface->h * surface->pitch;
+		#ifdef FBCON_DEBUG
+		fprintf(stderr, "Allocating bucket of %d bytes\n", size);
+		#endif
+
+		/* Quick check for available mem */
+		if ( size > surfaces_memleft ) 
+		{
+			SDL_SetError("Not enough video memory");
+			return(-1);
+		}
+
+		/* Search for an empty bucket big enough */
+		for ( bucket=&surfaces; bucket; bucket=bucket->next ) 
+		{
+			if ( ! bucket->used && (size <= bucket->size) )
+				break;
+		}
+		if ( bucket == NULL ) 
+		{
+			SDL_SetError("Video memory too fragmented");
+			return(-1);
+		}
+
+		/* Create a new bucket for left-over memory */
+		extra = (bucket->size - size);
+		if ( extra ) 
+		{
+			vidmem_bucket *newbucket;
+
+			#ifdef FBCON_DEBUG
+			fprintf(stderr, "Adding new free bucket of %d bytes\n", extra);
+			#endif
+			newbucket = (vidmem_bucket *)SDL_malloc(sizeof(*newbucket));
+			if ( newbucket == NULL ) 
+			{
+				SDL_OutOfMemory();
+				return(-1);
+			}
+			newbucket->prev = bucket;
+			newbucket->used = 0;
+			newbucket->base = bucket->base+size;
+			newbucket->size = extra;
+			newbucket->next = bucket->next;
+			if ( bucket->next )
+				bucket->next->prev = newbucket;
+			bucket->next = newbucket;
+		}
+
+		/* Set the current bucket values and return it! */
+		bucket->used = 1;
+		bucket->size = size;
+		bucket->dirty = 0;
+		#ifdef FBCON_DEBUG
+		fprintf(stderr, "Allocated %d bytes at %p\n", bucket->size, bucket->base);
+		#endif
+		surfaces_memleft -= size;
+		surface->flags |= SDL_HWSURFACE;
+		surface->pixels = bucket->base;
+		surface->hwdata = (struct private_hwdata *)bucket;
+		return(0);
 	}
+	
 	static void MAGX_FreeHWSurface(_THIS, SDL_Surface *surface)
 	{
-		return;
+		vidmem_bucket *bucket, *freeable;
+
+		/* Look for the bucket in the current list */
+		for ( bucket=&surfaces; bucket; bucket=bucket->next ) 
+		{
+		if ( bucket == (vidmem_bucket *)surface->hwdata )
+			break;
+		}
+		
+		if ( bucket && bucket->used ) 
+		{
+			/* Add the memory back to the total */
+			#ifdef DGA_DEBUG
+			printf("Freeing bucket of %d bytes\n", bucket->size);
+			#endif
+			surfaces_memleft += bucket->size;
+
+			/* Can we merge the space with surrounding buckets? */
+			bucket->used = 0;
+			if ( bucket->next && ! bucket->next->used ) 
+			{
+				#ifdef DGA_DEBUG
+				printf("Merging with next bucket, for %d total bytes\n", bucket->size+bucket->next->size);
+				#endif
+				freeable = bucket->next;
+				bucket->size += bucket->next->size;
+				bucket->next = bucket->next->next;
+				if ( bucket->next ) 
+					bucket->next->prev = bucket;
+				SDL_free(freeable);
+			}
+			if ( bucket->prev && ! bucket->prev->used ) 
+			{
+				#ifdef DGA_DEBUG
+				printf("Merging with previous bucket, for %d total bytes\n", bucket->prev->size+bucket->size);
+				#endif
+				freeable = bucket;
+				bucket->prev->size += bucket->size;
+				bucket->prev->next = bucket->next;
+				if ( bucket->next )
+					bucket->next->prev = bucket->prev;
+				SDL_free(freeable);
+			}
+		}
+		surface->pixels = NULL;
+		surface->hwdata = NULL;
 	}
+
 	static int MAGX_LockHWSurface(_THIS, SDL_Surface *surface)
 	{
 		return(0);
 	}
+	
 	static void MAGX_UnlockHWSurface(_THIS, SDL_Surface *surface)
 	{
-		return;
 	}
+	
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface)
 	{
+		SDL_Win->flipScreen();
 	}
 	
 	// Various screen update functions available
@@ -331,6 +531,8 @@ extern "C" {
 
 	void MAGX_VideoQuit(_THIS)
 	{
+		MAGX_FreeHWSurfaces(_this);
+		
 		// This is dumb, but if I free this, the app doesn't exit correctly.
 		// Of course, this will leak memory if init video is done more than once.
 		// Sucks but such is life.
@@ -340,4 +542,5 @@ extern "C" {
 		delete SDL_Win;
 		SDL_Win = 0;
 	}
+
 }; /* Extern C */

@@ -226,8 +226,8 @@ static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
 static struct fb_fix_screeninfo fb_finfo;
 
-#define hw_dbpp fb_orig_vinfo.bits_per_pixel
-#define vo_dbpp fb_vinfo.bits_per_pixel
+#define hw_dbpp (fb_orig_vinfo.bits_per_pixel)
+#define vo_dbpp (fb_vinfo.bits_per_pixel)
 static int in_dbpp = 0;
 
 #define bppToPixelSize(a) ((((a)-1)/8)+1)
@@ -239,15 +239,15 @@ static int in_dbpp = 0;
 static int dma_start = 0;
 
 //IPU
-static int p_height = 320;
-static int p_width = 240;
+#define p_height (fb_orig_vinfo.yres)
+#define p_width (fb_orig_vinfo.xres)
 static int in_height = 0;
 static int in_width = 0;
 
 static int fd_pp;
 static int pp_dma_count=0;
-static char * pp_dma_buffer[2];
-static pp_buf pp_desc[2];
+static char * pp_dma_buffer[200];
+static pp_buf pp_desc[200];
 
 static pp_buf pp_frame;
 static char * pp_frame_buffer = NULL;
@@ -298,6 +298,47 @@ err_out:
 	return 0;	
 }
 
+extern "C" bool isRotate()
+{
+	return ((width < height)!=(p_width < p_height));
+}
+
+extern "C" bool getFreeIPUMem( unsigned int * len, unsigned  int * start )
+{
+	int fb;
+	
+	if ((fb = open("/dev/fb/1", O_RDWR)) == -1) 
+	{
+		printf("MAGX_VO: Can't open /dev/fb/1: %s\n", strerror(errno));
+		return 0;
+	}
+	
+	struct fb_fix_screeninfo finfo;
+	if (ioctl(fb, FBIOGET_FSCREENINFO, &finfo)) 
+	{
+		printf("MAGX_VO: Can't get FSCREENINFO: %s\n", strerror(errno));
+		*len=0;
+		*start=0;
+		return 0;
+	}	
+
+	// IPU alloc of memory: 
+	//	Z6 - 5M
+	//	VE66 - 3M
+	//	E8 - 1M
+	//	ZN5 - 2M
+	
+	*len=3*1024*1024-pp_dma_count*pp_desc[0].size;
+	if ( *len<0 ) *len=0;
+	*start = (((unsigned int)finfo.smem_start)+pp_dma_count*pp_desc[0].size);
+	
+	printf("MAGX_VO: Free HW mem %u@%p\n", *len, (void*)(*start) );
+	
+	close(fb);
+	
+	return (len>0);
+}
+
 static int setBppFB( uint32_t in_bpp )
 {
 	if (!fb_dev_fd)
@@ -309,7 +350,7 @@ static int setBppFB( uint32_t in_bpp )
 	{
 		printf("MAGX_VO: switching to bpp: %d\n", in_bpp);
 		fb_vinfo.bits_per_pixel = in_bpp;
-
+		
 		if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo)) 
 		{
 			printf("MAGX_VO: Can't set VSCREENINFO: %s\n", strerror(errno));
@@ -358,9 +399,9 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 	in_width = width;
 	
 	bool dontrot = 0;
-	pp_dma_count=0;
+	pp_dma_count=0;	
 	
-	if (width < height) 
+	if ( (width < height)==(p_width < p_height) ) 
 	{
 		dontrot = 1;
 		screenRotation = SDL_QT_NO_ROTATION;
@@ -471,7 +512,7 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 	if (pp_reqbufs.req_size < (vwidth*vheight*in_pixel_size))
 		pp_reqbufs.req_size = (vwidth*vheight*in_pixel_size);
 
-	if (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs) < 0) 
+	if (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs) != 0) 
 	{
 			perror("MAGX_VO: PP_IOCTL_REQBUFS");
 			goto err_1;
@@ -480,7 +521,7 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 	for (i = 0; i < pp_reqbufs.count; i++) 
 	{
 			pp_desc[i].index = i;
-			if (ioctl(fd_pp, PP_IOCTL_QUERYBUF, &pp_desc[i]) < 0) 
+			if (ioctl(fd_pp, PP_IOCTL_QUERYBUF, &pp_desc[i]) != 0) 
 			{
 					perror("MAGX_VO: PP_IOCTL_QUERYBUF failed");
 					goto err_1;
@@ -491,6 +532,7 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 									fd_pp, pp_desc[i].addr);
 			if (pp_dma_buffer[i] == MAP_FAILED) 
 			{
+				printf("max %d\n", i);
 					perror("MAGX_VO: mmap IPU");
 					goto err_1;
 			}
@@ -671,7 +713,7 @@ void * SDL_ZWin::getFBBuf()
 
 void SDL_ZWin::flipScreen()
 {
-	if ( !pp_dma_count || FocusOut || my_suspended )
+	if ( FocusOut || my_suspended )
 		return;
 	
 	//Fix: skipping the first update screen, for normal show logo SDL
