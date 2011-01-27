@@ -35,6 +35,7 @@
 #include <stdlib.h>
 
 #include <ZApplication.h>
+#include <ZKeyDef.h>
 #include <qcopchannel_qws.h>
 #include <qtimer.h>
 

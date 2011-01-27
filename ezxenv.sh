@@ -3,6 +3,10 @@
 export TOOLPREFIX=/arm-eabi
 export QTDIR=/arm-eabi/lib/qt-ve66
 export EZXDIR=/arm-eabi/lib/ezx-ve66
+#export QTDIR=/arm-eabi/lib/qt-z6
+#export EZXDIR=/arm-eabi/lib/ezx-z6
+#export QTDIR=/arm-eabi/lib/qt-e8
+#export EZXDIR=/arm-eabi/lib/ezx-va76
 #export QTDIR=/arm-eabi/lib/qt-zn5
 #export EZXDIR=/arm-eabi/lib/ezx-zn5
 #export QTDIR=/arm-eabi/lib/qt-e8
