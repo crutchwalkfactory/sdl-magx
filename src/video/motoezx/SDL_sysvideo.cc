@@ -228,7 +228,7 @@ extern "C" {
 		// Fill in some window manager capabilities
 		_this->info.wm_available = 0;
 		_this->info.hw_available = 1;
-		_this->info.video_mem = 1*1024*1024;//Previously. After initializing the IPU will specify
+		_this->info.video_mem = 100;//Previously. After initializing the IPU will specify
 		
 		// We're done!
 		return 0;
@@ -308,7 +308,7 @@ extern "C" {
 			_this->UpdateRects = MAGX_NoUpdate;	
 		}
 
-		_this->info.video_mem = iIPUMemSize;
+		_this->info.video_mem = iFBMemSize/1024;
 		
 		MAGX_FreeHWSurfaces(_this);
 		MAGX_InitHWSurfaces(_this, current, (char*)iIPUMemFreeStart, iIPUMemFreeSize);

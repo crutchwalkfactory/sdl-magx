@@ -375,7 +375,6 @@ static void setScrBppFB(bool bOn)
 static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 {
 	pp_frame.size = p_width*p_height*vo_pixel_size;
-	iFBMemSize = p_width*p_height*vo_pixel_size;
 	
 	in_dbpp = in_bpp;
 	in_height = height;
@@ -422,7 +421,7 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 		}
 	}
 	
-	if ( true ||	(vo_dbpp!=in_dbpp) || 
+	if ( (vo_dbpp!=in_dbpp) || 
 			( dontrot && (width>p_width || height>p_height) ) ||
 			(!dontrot && (width>p_height || height>p_width) )     
 					)

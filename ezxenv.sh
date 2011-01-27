@@ -5,6 +5,8 @@ export QTDIR=/arm-eabi/lib/qt-ve66
 export EZXDIR=/arm-eabi/lib/ezx-ve66
 #export QTDIR=/arm-eabi/lib/qt-zn5
 #export EZXDIR=/arm-eabi/lib/ezx-zn5
+#export QTDIR=/arm-eabi/lib/qt-e8
+#export EZXDIR=/arm-eabi/lib/ezx-e8
 export PATH=$TOOLPREFIX/bin:$TOOLPREFIX/arm-linux-gnueabi/bin:$PATH
 
 export ARCH=iwmmxt 
