@@ -765,7 +765,10 @@ bool SDL_ZWin::SetVideoMode(uint32_t width, uint32_t height, uint32_t in_bpp)
 	setBppFB( in_bpp );
 	
 	//Show logo
-	FILE * f = fopen("/mmc/mmca1/123.bmp", "rb");
+	FILE * f = fopen("/mmc/mmca1/sdllogo.bin", "rb");
+	if ( !f ) f = fopen("/usr/mlib/SDL/sdllogo.bin", "rb");	
+	if ( !f ) f = fopen("/mmc/mmca1/games/lib/sdllogo.bin", "rb");
+	if ( !f ) f = fopen("/ezxlocal/download/mystuff/games/lib/sdllogo.bin", "rb");
 	if ( f )
 	{
 		fread(pp_frame_buffer, p_width*p_height*2, 1, f);
