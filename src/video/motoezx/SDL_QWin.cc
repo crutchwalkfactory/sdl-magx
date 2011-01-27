@@ -36,6 +36,7 @@
 
 #include <ZApplication.h>
 #include <qcopchannel_qws.h>
+#include <qtimer.h>
 
 /* Name of the environment variable used to invert the screen rotation or not:
 Possible values:
@@ -652,8 +653,7 @@ void signal_handler(int sig)
 
 SDL_ZWin::SDL_ZWin(const QSize& size)
     :ZKbMainWidget ( ZHeader::MAINDISPLAY_HEADER, 0, "SDL", 0),
-    my_mouse_pos(-1, -1), my_flags(0),
-    my_special(false),
+    my_mouse_pos(0, 0), my_special(false),
     my_suspended(false), last_mod(false)
 {
 	signal(SIGTERM, signal_handler);
@@ -833,11 +833,6 @@ void SDL_ZWin::setMousePos(const QPoint &pos)
 		my_mouse_pos = QPoint(pos.y(), width()-pos.x());
 }
 
-// This paints the current buffer to the screen, when desired. 
-void SDL_ZWin::paintEvent(QPaintEvent *ev) 
-{ 
-}  
-
 inline int SDL_ZWin::keyUp()
 {
   return my_special ? SmyUP : myUP;
@@ -873,7 +868,6 @@ bool SDL_ZWin::eventFilter(QObject* o, QEvent* pEvent)
 
     return false;
 }
-
 
 /* Function to translate a keyboard transition and queue the key event
  * This should probably be a table although this method isn't exactly
@@ -986,6 +980,31 @@ void SDL_ZWin::QueueKey(QKeyEvent *e, int pressed)
          scancode = my_special ? SmyNUMERAL : myNUMERAL;
       break;
       
+      #ifdef OMEGA_SUPPORT
+      case KEYCODE_OMG_TOUCH:
+		printf("OMG_TOUCH\n");
+		bOmgParse=2;
+		scancode = 111;
+		break;     
+      case KEYCODE_OMG_SCROLL:  
+		printf("OMG_SCROLL\n");
+		omgScroll(e);
+		scancode = 111;
+		break;     
+      case KEYCODE_OMG_STOP:  
+		//bOmgParse=0;
+		scancode = 111;
+		break;          
+      case KEYCODE_OMG_RESUME:  
+      printf("OMG_RESUME\n");
+      scancode = 111;
+      break;     
+      case KEYCODE_OMG_RATE:  
+      printf("OMG_RATE\n");
+      scancode = 111;
+      break;    
+      #endif
+       
       default:
 		printf("MAGX: Unknown key 0x%x\n", scancode);
         scancode = SDLK_UNKNOWN;
@@ -1026,3 +1045,26 @@ void SDL_ZWin::QueueKey(QKeyEvent *e, int pressed)
     SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
   }
 }
+
+#ifdef OMEGA_SUPPORT
+void SDL_ZWin::omgScroll(QKeyEvent *e)
+{
+	int step = e->step();
+	//if ( (bOmgParse==2) && (step != 0) )
+	if (step != 0)
+	{
+		step = (step>0)?1:-1;
+		if (screenRotation == SDL_QT_ROTATION_270) 
+			my_mouse_pos.setX(my_mouse_pos.x()-step*10);
+		if (screenRotation == SDL_QT_ROTATION_90)
+			my_mouse_pos.setX(my_mouse_pos.x()+step*10);	
+		
+		if (my_mouse_pos.x()<0) my_mouse_pos.setX(0);
+		if (my_mouse_pos.x()>in_width) my_mouse_pos.setX(in_width);
+			
+		SDL_PrivateMouseMotion(0, 0, my_mouse_pos.x(), my_mouse_pos.y());
+	}
+	
+	QApplication::setOmegaWheelScrollLines(-step);//e->step() - 
+}
+#endif

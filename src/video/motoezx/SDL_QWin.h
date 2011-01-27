@@ -78,7 +78,6 @@ public:
   
  protected:
 	void closeEvent(QCloseEvent *e);
-	void paintEvent(QPaintEvent *ev);
 	bool eventFilter( QObject *, QEvent * );
     void focusInEvent( QFocusEvent * );
     void focusOutEvent( QFocusEvent * );
@@ -89,6 +88,12 @@ private:
 	int keyLeft();
 	int keyRight();
 
+	//Omega
+	#ifdef OMEGA_SUPPORT
+	int bOmgParse;
+	void omgScroll(QKeyEvent *e);
+	#endif
+
 	enum 
 	{
 		EZX_LEFT_BUTTON = 1,
@@ -96,9 +101,7 @@ private:
 	};
 	void QueueKey(QKeyEvent *e, int pressed);
 
-	QPoint my_offset;
 	QPoint my_mouse_pos;
-	WFlags my_flags;
 	bool my_special;
 	QCopChannel *inCallChannel,*ounCallChannel;
 	int my_suspended;
