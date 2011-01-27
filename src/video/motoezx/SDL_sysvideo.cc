@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 
-#include <zapplication.h>
+#include <ZApplication.h>
 
 #include "SDL_timer.h"
 #include "SDL_QWin.h"

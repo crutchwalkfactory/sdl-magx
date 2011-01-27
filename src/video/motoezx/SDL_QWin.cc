@@ -32,9 +32,10 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <zapplication.h>
-#include <qcopchannel_qws.h>
 #include <stdlib.h>
+
+#include <ZApplication.h>
+#include <qcopchannel_qws.h>
 
 /* Name of the environment variable used to invert the screen rotation or not:
 Possible values:

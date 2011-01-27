@@ -6,7 +6,7 @@
 #ifdef main
 #undef main
 #endif
-#include <zapplication.h>
+#include <ZApplication.h>
 #include <stdlib.h>
 
 extern int SDL_main(int argc, char *argv[]);
