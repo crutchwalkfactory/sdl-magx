@@ -1,7 +1,7 @@
 /****************************************************************************
 ** SDL_ZWin meta object code from reading C++ file 'SDL_QWin.h'
 **
-** Created: Wed Jan 26 22:59:15 2011
+** Created: Thu Jan 27 11:51:30 2011
 **      by: The Qt MOC ($Id: qt/src/moc/moc.y   2.3.8   edited 2004-08-05 $)
 **
 ** WARNING! All changes made in this file will be lost!

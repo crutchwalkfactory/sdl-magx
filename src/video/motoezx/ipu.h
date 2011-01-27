@@ -34,6 +34,11 @@
 #ifndef _INCLUDE_IPU_H_
 #define _INCLUDE_IPU_H_
 
+//Const defined in ipu_alloc.h
+#define IPU_PAGE_ALIGN   ((unsigned long int) 0x00001000)
+#define IPU_MEM_ALIGN(a) ( (((a)+IPU_PAGE_ALIGN-1)/IPU_PAGE_ALIGN)*IPU_PAGE_ALIGN )
+//
+
 #include <linux/types.h>
 
 #if defined(CONFIG_MOT_FEAT_IPU_MEM_ADDR)

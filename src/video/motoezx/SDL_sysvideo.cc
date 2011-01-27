@@ -34,6 +34,7 @@
 
 #include "SDL_timer.h"
 #include "SDL_QWin.h"
+#include "ipu.h"
 
 extern "C" {
 
@@ -281,22 +282,30 @@ extern "C" {
 			return(NULL);
 		} 
 
-		current->flags = SDL_FULLSCREEN | SDL_HWSURFACE;
+		current->flags = SDL_FULLSCREEN;
 		current->w = width;
 		current->h = height;
 		current->pitch = SDL_CalculatePitch(current);
 		current->pixels = SDL_Win->getFBBuf();
 		
-		if ( isRotate() && ((flags|SDL_DOUBLEBUF)==SDL_DOUBLEBUF) )
+		if ( isRotate() || isScalling() ) 
 		{
-			current->flags |= SDL_DOUBLEBUF;
-			_this->UpdateRects = MAGX_NoUpdate;
+			if ( isRotate() && isScalling() ) 
+				current->flags |= SDL_SWSURFACE;
+			else
+				current->flags |= SDL_HWSURFACE;
+				
+			if ( (flags|SDL_DOUBLEBUF)==SDL_DOUBLEBUF )
+			{
+				current->flags |= SDL_DOUBLEBUF;
+				_this->UpdateRects = MAGX_NoUpdate;				
+			} else
+			{
+				_this->UpdateRects = MAGX_NormalUpdate;
+			}
 		} else
 		{
-			if ( isRotate() )
-				_this->UpdateRects = MAGX_NormalUpdate;
-			else
-				_this->UpdateRects = MAGX_NoUpdate;			
+			_this->UpdateRects = MAGX_NoUpdate;	
 		}
 
 		_this->info.video_mem = iIPUMemSize;
@@ -332,6 +341,8 @@ extern "C" {
 	// We don't actually allow hardware surfaces other than the main one
 	static int MAGX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size)
 	{
+		printf("MAGX: MAGX_InitHWSurfaces\n");
+		
 		vidmem_bucket *bucket;
 
 		surfaces_memtotal = size;
@@ -366,6 +377,8 @@ extern "C" {
 	
 	static void MAGX_FreeHWSurfaces(_THIS)
 	{
+		printf("MAGX: MAGX_FreeHWSurfaces\n");
+		
 		vidmem_bucket *bucket, *freeable;
 
 		bucket = surfaces.next;
@@ -380,7 +393,7 @@ extern "C" {
 
 	static int MAGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 	{
-		printf("MAGX: alloc surface!!!!!!!\n"); fflush(stdout);
+		printf("MAGX: MAGX_AllocHWSurface\n");
 		
 		vidmem_bucket *bucket;
 		int size;
@@ -397,7 +410,8 @@ extern "C" {
 			return(-1);
 		}
 		surface->pitch = SDL_VideoSurface->pitch;
-		size = surface->h * surface->pitch;
+		size = IPU_MEM_ALIGN(surface->h * surface->pitch);
+		
 		printf("MAGX: Allocating bucket of %d bytes\n", size);
 
 		/* Quick check for available mem */
@@ -455,6 +469,8 @@ extern "C" {
 	
 	static void MAGX_FreeHWSurface(_THIS, SDL_Surface *surface)
 	{
+		printf("MAGX: MAGX_FreeHWSurface\n");
+		
 		vidmem_bucket *bucket, *freeable;
 
 		/* Look for the bucket in the current list */
