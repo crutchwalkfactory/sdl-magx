@@ -254,6 +254,8 @@ static pp_buf pp_desc[2];
 static pp_buf pp_frame;
 static char * pp_frame_buffer = NULL;
 
+static pp_start_params pp_st;
+
 extern "C" 
 {
 unsigned int iIPUMemSize;
@@ -434,7 +436,6 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 	
 	memset(&pp_init, 0, sizeof(pp_init));
 
-
 	if ( pp_dma_count>1 )
 		pp_init.mode = PP_PP_ROT;
 	else
@@ -560,6 +561,13 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 		iIPUMemFreeSize-=pp_desc[i].size;
 	}
 
+	memset(&pp_st, 0, sizeof(pp_st));
+	pp_st.wait = 0;
+	pp_st.in = pp_desc[0];
+	if ( pp_dma_count>1 )
+		pp_st.mid = pp_desc[1];
+	pp_st.out = pp_frame;	
+
 	printf("MAGX_VO: IPU inited!\n");
 	
 	vo_inited=1;
@@ -622,14 +630,6 @@ static void flipPage()
 		return;
 
 	//printf("MAGX_VO: flip\n"); fflush(stdout);
-	
-	pp_start_params pp_st;
-	memset(&pp_st, 0, sizeof(pp_st));
-	pp_st.wait = 0;
-	pp_st.in = pp_desc[0];
-	if ( pp_dma_count>1 )
-		pp_st.mid = pp_desc[1];
-	pp_st.out = pp_frame;	
 
 	if (ioctl(fd_pp, PP_IOCTL_START, &pp_st) < 0) 
 	{
@@ -638,6 +638,64 @@ static void flipPage()
 			perror("MAGX_VO: PP_IOCTL_WAIT");
 	} else
 		dma_start = 1;
+}
+
+extern "C" bool reinitWithBuffer()
+{
+	printf("MAGX_VO: Create IPU buffer for DB\n");
+	
+	if ( pp_dma_count!=0 ) return 0;
+	pp_dma_count=1;
+
+	pp_reqbufs_params pp_reqbufs;
+	pp_reqbufs.count = pp_dma_count;
+	pp_reqbufs.req_size = p_width*p_height*vo_pixel_size;
+
+	if ( ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs)!=0 )
+	{
+		perror("MAGX_VO: PP_IOCTL_REQBUFS");
+		return 0;
+	}
+	
+	pp_desc[0].index = 0;
+	if ( ioctl(fd_pp, PP_IOCTL_QUERYBUF, &pp_desc[0]) != 0 ) 
+	{
+		perror("MAGX_VO: PP_IOCTL_QUERYBUF failed");
+		return 0;
+	}
+
+	pp_dma_buffer[0] = (char*)mmap (NULL, pp_desc[0].size, 
+						PROT_READ | PROT_WRITE, MAP_SHARED, 
+							fd_pp, pp_desc[0].addr);
+	if (pp_dma_buffer[0] == MAP_FAILED) 
+	{
+		fprintf(stderr,"MAGX_VO: mmap IPU 0\n");
+		return 0;
+	}
+	
+	memset(pp_dma_buffer[0], 0, pp_desc[0].size);
+
+	iIPUMemFreeStart+=pp_desc[0].size;
+	iIPUMemFreeSize-=pp_desc[0].size;
+	
+	printf("MAGX_VO: alloced IPU buffer\n");
+	
+	return 1;
+}
+
+static void flipBuffer()
+{
+	char *src, *dst;
+	int w, h;
+	int srcskip, dstskip;
+
+	w = p_width*vo_pixel_size;
+	h = p_height;
+	src = pp_dma_buffer[0];
+	dst = pp_frame_buffer;
+
+	while ( h-- ) 
+		SDL_memcpy(dst, src, p_width);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -739,6 +797,22 @@ void SDL_ZWin::flipScreen()
 	}
 	
 	flipPage();
+}
+
+void SDL_ZWin::flipScreen2()
+{
+	if ( FocusOut || my_suspended )
+		return;
+	
+	//Fix: skipping the first update screen, for normal show logo SDL
+	if ( vo_inited==1 ) 
+	{
+		vo_inited++;
+		//printf("MAGX: skip first flip\n");
+		return;
+	}
+	
+	flipBuffer();
 }
 
 void SDL_ZWin::uninitVideo()

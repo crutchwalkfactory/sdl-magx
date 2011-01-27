@@ -63,6 +63,7 @@ extern "C" {
 	static void MAGX_UnlockHWSurface(_THIS, SDL_Surface *surface);
 	static void MAGX_FreeHWSurface(_THIS, SDL_Surface *surface);
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface);
+	static int MAGX_FlipHWSurface2(_THIS, SDL_Surface *surface);
 
 	static void MAGX_FreeHWSurfaces(_THIS);
 	static int MAGX_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size);
@@ -254,6 +255,7 @@ extern "C" {
 	extern unsigned int iIPUMemFreeSize;
 	extern unsigned int iIPUMemFreeStart;
 	extern unsigned int iFBMemSize;
+	extern bool reinitWithBuffer();
 	
 	/* FIXME: check return values and cleanup here */
 	SDL_Surface *MAGX_SetVideoMode(_THIS, SDL_Surface *current,
@@ -305,6 +307,11 @@ extern "C" {
 			}
 		} else
 		{
+			if ( (flags|SDL_DOUBLEBUF)==SDL_DOUBLEBUF && reinitWithBuffer() )
+			{
+				_this->FlipHWSurface = MAGX_FlipHWSurface2;
+				current->flags |= SDL_DOUBLEBUF | SDL_HWSURFACE;
+			}
 			_this->UpdateRects = MAGX_NoUpdate;	
 		}
 
@@ -525,6 +532,11 @@ extern "C" {
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface)
 	{
 		SDL_Win->flipScreen();
+	}
+	
+	static int MAGX_FlipHWSurface2(_THIS, SDL_Surface *surface)
+	{
+		SDL_Win->flipScreen2();
 	}
 	
 	// Various screen update functions available

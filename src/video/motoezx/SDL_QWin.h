@@ -66,6 +66,7 @@ public:
 	bool SetVideoMode(uint32_t width, uint32_t height, uint32_t in_dbpp);
 	void * getFBBuf();
 	void flipScreen();
+	void flipScreen2();
 	void uninitVideo();
 	
 	bool isOK() { return isOk; }
