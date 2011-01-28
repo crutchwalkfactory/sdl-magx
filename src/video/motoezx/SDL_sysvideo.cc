@@ -263,8 +263,16 @@ extern "C" {
 	{
 		printf("MAGX: SetVideoMode width=%d height=%d bpp=%d\n", width, height, bpp);
 		
+		printf("MAGX: SDL request:\n");
+		if ( flags & SDL_HWSURFACE ) 
+			printf("\t- Surface is in video memory;\n");
+		if ( flags & SDL_HWACCEL ) 
+			printf("\t- Hardware acceleration;\n");			
+		if ( flags & SDL_DOUBLEBUF ) 
+			printf("\t- Double-buffered video mode;\n");		
 		if ( flags & SDL_OPENGL ) 
 		{
+			printf("\t- OpenGL rendering context;\n");
 			SDL_SetError("OpenGL not supported");
 			return(NULL);
 		} 
@@ -274,9 +282,6 @@ extern "C" {
 			SDL_SetError("Not supportet video mode!");
 			return(NULL);		
 		}
-		
-		if ( flags & SDL_HWSURFACE ) 
-			printf("MAGX: SDL request HW!\n");
 
 		if ( !SDL_Win->SetVideoMode(width, height, bpp) )
 		{
@@ -297,7 +302,7 @@ extern "C" {
 			else
 				current->flags |= SDL_HWSURFACE;
 				
-			if ( (flags|SDL_DOUBLEBUF)==SDL_DOUBLEBUF )
+			if ( flags&SDL_DOUBLEBUF )
 			{
 				current->flags |= SDL_DOUBLEBUF;
 				_this->UpdateRects = MAGX_NoUpdate;				
@@ -307,12 +312,14 @@ extern "C" {
 			}
 		} else
 		{
-			if ( (flags|SDL_DOUBLEBUF)==SDL_DOUBLEBUF && reinitWithBuffer() )
+			if ( flags&SDL_DOUBLEBUF && reinitWithBuffer() )
 			{
+				current->flags |= SDL_DOUBLEBUF;
 				_this->FlipHWSurface = MAGX_FlipHWSurface2;
-				current->flags |= SDL_DOUBLEBUF | SDL_HWSURFACE;
 			}
+			current->flags |= SDL_HWSURFACE;
 			_this->UpdateRects = MAGX_NoUpdate;	
+			
 		}
 
 		_this->info.video_mem = iFBMemSize/1024;

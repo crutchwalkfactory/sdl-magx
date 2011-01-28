@@ -205,7 +205,7 @@ void CargarTeclas()
 ////////////////////////////////////////////////////////////////////////
 //
 // Motorola IPU and FB init and configuration for SDL
-//		by Ant-ON <prozanton@gmail.com>
+//		by Anton Prozorov <prozanton@gmail.com>
 //		(C) 2011
 //
 // Based on:
@@ -496,27 +496,25 @@ static int initIPU( uint32_t width, uint32_t height, uint32_t in_bpp )
 	//Get size of IPU memory
 	pp_reqbufs.count = 1;
 
-	bool bMemAllowed=true;
+	bool bMemAllowed=false;
 	iIPUMemSize=0;
 
-	for ( int i=5;i>0;i-- )
+	for ( int i=10;i>0&&!bMemAllowed;i-- )
 	{
-		pp_reqbufs.req_size = i*1024*1024;
+		pp_reqbufs.count = 1;
+		pp_reqbufs.req_size = i*512*1024;
 	
 		//Try alloc memory
 		bMemAllowed = (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs)==0);
 
 		if ( bMemAllowed )
-		{
 			iIPUMemFreeSize=iIPUMemSize=pp_reqbufs.req_size;
-			break;
-		}
+
+		// Free mem
+		pp_reqbufs.count = 0;
+		ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs);		
 	}
 	printf("MAGX_VO: IPU memory: %uM\n", iIPUMemSize/(1024*1024));
-	
-	// Free mem
-	pp_reqbufs.count = 0;
-	ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs);
 	
 	//Get buffer
 	pp_reqbufs.count = pp_dma_count?(pp_dma_count>1?2:PP_MAX_BUFFER_CNT):0;
