@@ -745,6 +745,8 @@ SDL_ZWin::~SDL_ZWin()
 	printf("MAGX: ~SDL_QWin(): done\n");
 }
 
+#include "SDL_logo.c"
+
 bool SDL_ZWin::SetVideoMode(uint32_t width, uint32_t height, uint32_t in_bpp)
 {
 	if ( in_bpp >= 24 )
@@ -762,17 +764,20 @@ bool SDL_ZWin::SetVideoMode(uint32_t width, uint32_t height, uint32_t in_bpp)
 	
 	setBppFB( in_bpp );
 	
-	//Show logo
-	FILE * f = fopen("/mmc/mmca1/sdllogo.bin", "rb");
-	if ( !f ) f = fopen("/usr/mlib/SDL/sdllogo.bin", "rb");	
-	if ( !f ) f = fopen("/mmc/mmca1/games/lib/sdllogo.bin", "rb");
-	if ( !f ) f = fopen("/ezxlocal/download/mystuff/games/lib/sdllogo.bin", "rb");
-	if ( f )
+	// Show logo
+	// logo: 230x150 2bpp
+	memset(pp_frame_buffer, 255, p_height*p_width*2);
+	int iTop = (p_height-150)/2;
+	int iLeft = (p_width-230)/2;
+	char * pCur = pp_frame_buffer+2*iTop*p_width+2*iLeft;
+	char * pLogo = (char*)sdlLogo+230*149*2;
+	for ( int i=0; i<150; i++ )
 	{
-		fread(pp_frame_buffer, p_width*p_height*2, 1, f);
-		fclose(f);
-		sleep(1);
+		memcpy(pCur, pLogo, 2*230);
+		pLogo -= 2*230;
+		pCur += 2*p_width;
 	}
+	sleep(1);
 
 	return initIPU( width, height, in_bpp );
 }
