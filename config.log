@@ -916,7 +916,7 @@ configure:17800: result: no
 configure:17809: checking for pow
 configure:17865: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
 conftest.c:69: warning: conflicting types for built-in function 'pow'
-/tmp/ccWD5MOv.o: In function `main':
+/tmp/ccUtJIH3.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:80: undefined reference to `pow'
 collect2: ld returned 1 exit status
 configure:17872: $? = 1
@@ -1082,7 +1082,7 @@ configure:18231: $? = 0
 configure:18253: result: yes
 configure:18168: checking for strlcpy
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccOf3vR3.o: In function `main':
+/tmp/ccoqgskk.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:95: undefined reference to `strlcpy'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1188,7 +1188,7 @@ configure: failed program was:
 configure:18253: result: no
 configure:18168: checking for strlcat
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccy5hIed.o: In function `main':
+/tmp/ccsMeijw.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:95: undefined reference to `strlcat'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1299,7 +1299,7 @@ configure:18231: $? = 0
 configure:18253: result: yes
 configure:18168: checking for _strrev
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccOoBQ6e.o: In function `main':
+/tmp/cciT6nHO.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:96: undefined reference to `_strrev'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1406,7 +1406,7 @@ configure: failed program was:
 configure:18253: result: no
 configure:18168: checking for _strupr
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccCDl2Hr.o: In function `main':
+/tmp/ccuTZ3YX.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:96: undefined reference to `_strupr'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1513,7 +1513,7 @@ configure: failed program was:
 configure:18253: result: no
 configure:18168: checking for _strlwr
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cca7Jp2y.o: In function `main':
+/tmp/ccEicRu5.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:96: undefined reference to `_strlwr'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1635,7 +1635,7 @@ configure:18231: $? = 0
 configure:18253: result: yes
 configure:18168: checking for itoa
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cc0xac9c.o: In function `main':
+/tmp/ccEEFHDN.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:99: undefined reference to `itoa'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1745,7 +1745,7 @@ configure: failed program was:
 configure:18253: result: no
 configure:18168: checking for _ltoa
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccGXgwzm.o: In function `main':
+/tmp/cc4WqTrY.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:99: undefined reference to `_ltoa'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1855,7 +1855,7 @@ configure: failed program was:
 configure:18253: result: no
 configure:18168: checking for _uitoa
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cc62qzsw.o: In function `main':
+/tmp/ccGgfff8.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:99: undefined reference to `_uitoa'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -1965,7 +1965,7 @@ configure: failed program was:
 configure:18253: result: no
 configure:18168: checking for _ultoa
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccsq5gbF.o: In function `main':
+/tmp/ccmmpE8h.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:99: undefined reference to `_ultoa'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -2083,7 +2083,7 @@ configure:18231: $? = 0
 configure:18253: result: yes
 configure:18168: checking for _i64toa
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cccAyrtb.o: In function `main':
+/tmp/cciH3kNs.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:101: undefined reference to `_i64toa'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -2195,7 +2195,7 @@ configure: failed program was:
 configure:18253: result: no
 configure:18168: checking for _ui64toa
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccQSTQVk.o: In function `main':
+/tmp/ccIch18A.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:101: undefined reference to `_ui64toa'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -2333,7 +2333,7 @@ configure:18231: $? = 0
 configure:18253: result: yes
 configure:18168: checking for _stricmp
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/cc4sDvUf.o: In function `main':
+/tmp/ccsOSe0M.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:107: undefined reference to `_stricmp'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -2455,7 +2455,7 @@ configure:18231: $? = 0
 configure:18253: result: yes
 configure:18168: checking for _strnicmp
 configure:18224: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c  >&5
-/tmp/ccyS2oTx.o: In function `main':
+/tmp/ccquCqa8.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:108: undefined reference to `_strnicmp'
 collect2: ld returned 1 exit status
 configure:18231: $? = 1
@@ -2821,7 +2821,7 @@ configure:28545: $? = 0
 configure:28561: result: yes
 configure:28565: checking for dlopen in -lc
 configure:28600: arm-linux-gnu-gcc -o conftest -g -O2 -I./include -D_GNU_SOURCE=1  -I./include -D_GNU_SOURCE=1   conftest.c -lc   >&5
-/tmp/ccOX52vf.o: In function `main':
+/tmp/cc6cOqSR.o: In function `main':
 /home/anton/MyPort/SDL_MAGX/conftest.c:99: undefined reference to `dlopen'
 collect2: ld returned 1 exit status
 configure:28607: $? = 1
@@ -4040,7 +4040,7 @@ configure: failed program was:
 | }
 configure:25990: result: no
 configure:26302: checking for MAGX support
-configure:26338: arm-linux-gnu-g++ -c -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions  -I./include -D_GNU_SOURCE=1 conftest.cpp >&5
+configure:26338: arm-linux-gnu-g++ -c -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -march=armv6j -mtune=arm1136jf-s -mfpu=vfp  -I./include -D_GNU_SOURCE=1 conftest.cpp >&5
 configure:26344: $? = 0
 configure:26361: result: yes
 configure:26488: checking for Motorola/EZX audio support
@@ -5234,7 +5234,7 @@ ESD_CFLAGS=''
 ESD_CONFIG=''
 ESD_LIBS=''
 EXEEXT=''
-EXTRA_CFLAGS='-I./include -D_GNU_SOURCE=1 -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -D_REENTRANT -DHAVE_LINUX_VERSION_H'
+EXTRA_CFLAGS='-I./include -D_GNU_SOURCE=1 -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -march=armv6j -mtune=arm1136jf-s -mfpu=vfp -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -D_REENTRANT -DHAVE_LINUX_VERSION_H'
 EXTRA_LDFLAGS=' -lm -ldl -L/arm-eabi/lib/qt-ve66/lib -L/arm-eabi/lib/ezx-ve66/lib -ldl -lpthread -lezxappbase -lqte-mt -L/arm-eabi/lib/qt-ve66/lib -lezxsound -lpthread'
 FGREP='/bin/grep -F'
 GREP='/bin/grep'
@@ -5259,7 +5259,7 @@ NASMFLAGS=''
 NM='/arm-eabi/bin/arm-linux-gnueabi-nm -B'
 NMEDIT=''
 OBJDUMP='arm-linux-gnueabi-objdump'
-OBJECTS='$(objects)/SDL.lo $(objects)/SDL_error.lo $(objects)/SDL_fatal.lo $(objects)/SDL_audio.lo $(objects)/SDL_audiocvt.lo $(objects)/SDL_audiodev.lo $(objects)/SDL_mixer.lo $(objects)/SDL_mixer_MMX.lo $(objects)/SDL_mixer_MMX_VC.lo $(objects)/SDL_mixer_m68k.lo $(objects)/SDL_wave.lo $(objects)/SDL_cdrom.lo $(objects)/SDL_cpuinfo.lo $(objects)/SDL_active.lo $(objects)/SDL_events.lo $(objects)/SDL_expose.lo $(objects)/SDL_keyboard.lo $(objects)/SDL_mouse.lo $(objects)/SDL_quit.lo $(objects)/SDL_resize.lo $(objects)/SDL_rwops.lo $(objects)/SDL_getenv.lo $(objects)/SDL_iconv.lo $(objects)/SDL_malloc.lo $(objects)/SDL_qsort.lo $(objects)/SDL_stdlib.lo $(objects)/SDL_string.lo $(objects)/SDL_thread.lo $(objects)/SDL_timer.lo $(objects)/SDL_RLEaccel.lo $(objects)/SDL_blit.lo $(objects)/SDL_blit_0.lo $(objects)/SDL_blit_1.lo $(objects)/SDL_blit_A.lo $(objects)/SDL_blit_N.lo $(objects)/SDL_bmp.lo $(objects)/SDL_cursor.lo $(objects)/SDL_gamma.lo $(objects)/SDL_pixels.lo $(objects)/SDL_stretch.lo $(objects)/SDL_surface.lo $(objects)/SDL_video.lo $(objects)/SDL_yuv.lo $(objects)/SDL_yuv_mmx.lo $(objects)/SDL_yuv_sw.lo $(objects)/SDL_joystick.lo $(objects)/SDL_nullevents.lo $(objects)/SDL_nullmouse.lo $(objects)/SDL_nullvideo.lo $(objects)/SDL_diskaudio.lo $(objects)/SDL_dummyaudio.lo $(objects)/SDL_sysloadso.lo $(objects)/SDL_magx_kernel.lo $(objects)/SDL_magx_overlay.lo $(objects)/SDL_magx_sys.lo $(objects)/SDL_magx_video.lo $(objects)/SDL_magx_win.lo $(objects)/ipu_alloc.lo $(objects)/moc_SDL_magx_win.lo $(objects)/SDL_ezxaudio.lo $(objects)/SDL_systhread.lo $(objects)/SDL_syssem.lo $(objects)/SDL_sysmutex.lo $(objects)/SDL_syscond.lo $(objects)/SDL_sysjoystick.lo $(objects)/SDL_systimer.lo $(objects)/SDL_syscdrom.lo'
+OBJECTS='$(objects)/SDL.lo $(objects)/SDL_error.lo $(objects)/SDL_fatal.lo $(objects)/SDL_audio.lo $(objects)/SDL_audiocvt.lo $(objects)/SDL_audiodev.lo $(objects)/SDL_mixer.lo $(objects)/SDL_mixer_MMX.lo $(objects)/SDL_mixer_MMX_VC.lo $(objects)/SDL_mixer_m68k.lo $(objects)/SDL_wave.lo $(objects)/SDL_cdrom.lo $(objects)/SDL_cpuinfo.lo $(objects)/SDL_active.lo $(objects)/SDL_events.lo $(objects)/SDL_expose.lo $(objects)/SDL_keyboard.lo $(objects)/SDL_mouse.lo $(objects)/SDL_quit.lo $(objects)/SDL_resize.lo $(objects)/SDL_rwops.lo $(objects)/SDL_getenv.lo $(objects)/SDL_iconv.lo $(objects)/SDL_malloc.lo $(objects)/SDL_qsort.lo $(objects)/SDL_stdlib.lo $(objects)/SDL_string.lo $(objects)/SDL_thread.lo $(objects)/SDL_timer.lo $(objects)/SDL_RLEaccel.lo $(objects)/SDL_blit.lo $(objects)/SDL_blit_0.lo $(objects)/SDL_blit_1.lo $(objects)/SDL_blit_A.lo $(objects)/SDL_blit_N.lo $(objects)/SDL_bmp.lo $(objects)/SDL_cursor.lo $(objects)/SDL_gamma.lo $(objects)/SDL_pixels.lo $(objects)/SDL_stretch.lo $(objects)/SDL_surface.lo $(objects)/SDL_video.lo $(objects)/SDL_yuv.lo $(objects)/SDL_yuv_mmx.lo $(objects)/SDL_yuv_sw.lo $(objects)/SDL_joystick.lo $(objects)/SDL_nullevents.lo $(objects)/SDL_nullmouse.lo $(objects)/SDL_nullvideo.lo $(objects)/SDL_diskaudio.lo $(objects)/SDL_dummyaudio.lo $(objects)/SDL_sysloadso.lo $(objects)/SDL_magx_kernel.lo $(objects)/SDL_magx_sys.lo $(objects)/SDL_magx_video.lo $(objects)/SDL_magx_win.lo $(objects)/ipu_alloc.lo $(objects)/moc_SDL_magx_win.lo $(objects)/SDL_ezxaudio.lo $(objects)/SDL_systhread.lo $(objects)/SDL_syssem.lo $(objects)/SDL_sysmutex.lo $(objects)/SDL_syscond.lo $(objects)/SDL_sysjoystick.lo $(objects)/SDL_systimer.lo $(objects)/SDL_syscdrom.lo'
 OBJEXT='o'
 OSMESA_CONFIG=''
 OTOOL64=''

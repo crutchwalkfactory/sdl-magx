@@ -781,9 +781,9 @@ S["EXTRA_LDFLAGS"]=" -lm -ldl -L/arm-eabi/lib/qt-ve66/lib -L/arm-eabi/lib/ezx-ve
 "read"
 S["BUILD_LDFLAGS"]=""
 S["EXTRA_CFLAGS"]="-I./include -D_GNU_SOURCE=1 -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include "\
-"-DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -nostdinc -I/arm-eabi/include -I/arm-eab"\
-"i/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/inclu"\
-"de -DNO_DEBUG -fno-rtti -fno-exceptions -D_REENTRANT -DHAVE_LINUX_VERSION_H"
+"-DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -march=armv6j -mtune=arm1136jf-s -mfpu=v"\
+"fp -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-"\
+"ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -D_REENTRANT -DHAVE_LINUX_VERSION_H"
 S["BUILD_CFLAGS"]="-g -O2 "
 S["SDLMAIN_OBJECTS"]="$(objects)/SDL_motoezx_main.o"
 S["SDLMAIN_SOURCES"]="./src/main/magx/*.cc"
@@ -796,9 +796,9 @@ S["OBJECTS"]="$(objects)/SDL.lo $(objects)/SDL_error.lo $(objects)/SDL_fatal.lo 
 "_bmp.lo $(objects)/SDL_cursor.lo $(objects)/SDL_gamma.lo $(objects)/SDL_pixels.lo $(objects)/SDL_stretch.lo $(objects)/SDL_surface.lo $(objects)/SDL"\
 "_video.lo $(objects)/SDL_yuv.lo $(objects)/SDL_yuv_mmx.lo $(objects)/SDL_yuv_sw.lo $(objects)/SDL_joystick.lo $(objects)/SDL_nullevents.lo $(objects"\
 ")/SDL_nullmouse.lo $(objects)/SDL_nullvideo.lo $(objects)/SDL_diskaudio.lo $(objects)/SDL_dummyaudio.lo $(objects)/SDL_sysloadso.lo $(objects)/SDL_m"\
-"agx_kernel.lo $(objects)/SDL_magx_overlay.lo $(objects)/SDL_magx_sys.lo $(objects)/SDL_magx_video.lo $(objects)/SDL_magx_win.lo $(objects)/ipu_alloc"\
-".lo $(objects)/moc_SDL_magx_win.lo $(objects)/SDL_ezxaudio.lo $(objects)/SDL_systhread.lo $(objects)/SDL_syssem.lo $(objects)/SDL_sysmutex.lo $(obje"\
-"cts)/SDL_syscond.lo $(objects)/SDL_sysjoystick.lo $(objects)/SDL_systimer.lo $(objects)/SDL_syscdrom.lo"
+"agx_kernel.lo $(objects)/SDL_magx_sys.lo $(objects)/SDL_magx_video.lo $(objects)/SDL_magx_win.lo $(objects)/ipu_alloc.lo $(objects)/moc_SDL_magx_win"\
+".lo $(objects)/SDL_ezxaudio.lo $(objects)/SDL_systhread.lo $(objects)/SDL_syssem.lo $(objects)/SDL_sysmutex.lo $(objects)/SDL_syscond.lo $(objects)/"\
+"SDL_sysjoystick.lo $(objects)/SDL_systimer.lo $(objects)/SDL_syscdrom.lo"
 S["SOURCES"]=" ./src/*.c ./src/audio/*.c ./src/cdrom/*.c ./src/cpuinfo/*.c ./src/events/*.c ./src/file/*.c ./src/stdlib/*.c ./src/thread/*.c ./src/timer/*.c ./src"\
 "/video/*.c ./src/joystick/*.c ./src/video/dummy/*.c ./src/audio/disk/*.c ./src/audio/dummy/*.c ./src/loadso/dlopen/*.c ./src/video/magx/*.cc ./src/a"\
 "udio/ezx/*.cc ./src/thread/pthread/SDL_systhread.c ./src/thread/pthread/SDL_syssem.c ./src/thread/pthread/SDL_sysmutex.c ./src/thread/pthread/SDL_sy"\

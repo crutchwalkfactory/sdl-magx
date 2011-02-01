@@ -29,6 +29,8 @@ public:
 	const QPoint& mousePos() const { return my_mouse_pos; }
 	void setMousePos(const QPoint& newpos);
 
+	void setRotation(screenRotationT r) { rot=r; }
+
  public slots:
 	void channel(const QCString &, const QByteArray &);
 
@@ -65,6 +67,8 @@ private:
 	QCopChannel *inCallChannel,*ounCallChannel;
 	SDL_keysym last;
 	bool last_mod;
+	
+	screenRotationT rot;
 };
 
 #endif

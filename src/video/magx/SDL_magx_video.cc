@@ -21,7 +21,6 @@ extern "C"
 	#include "../SDL_pixels_c.h"
 
 	#include "SDL_magx_sys.h"
-	#include "SDL_magx_overlay.h"
 	#include "SDL_magx_video.h"
 
 	// Initialization/Query functions
@@ -90,7 +89,7 @@ extern "C"
 		device->PumpEvents = MAGX_PumpEvents;
 		
 		//Overlay
-		device->CreateYUVOverlay = NULL;//SDL_CreateYUV_HW;
+		device->CreateYUVOverlay = NULL;
 
 		//WM
 		device->SetIcon = NULL;
@@ -128,6 +127,8 @@ extern "C"
 	"MAGX", "Motorola / MAGX FB+IPU graphics",
 	MAGX_Available, MAGX_CreateDevice
 	};
+	
+	#include <sys/ioctl.h>
 	
 	int MAGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	{
@@ -278,6 +279,11 @@ extern "C"
 		
 		int mode = (isRotate()?1:0) + (isScalling()?1:0) + (isBppConvert()?1:0);
 		
+		if ( isRotate() )
+			SDL_MainWin->setRotation(screenRotation);
+		else
+			SDL_MainWin->setRotation(SDL_QT_NO_ROTATION);		
+		
 		if ( mode<2 )
 			current->flags |= SDL_HWSURFACE;
 		else
@@ -394,7 +400,6 @@ extern "C"
 			SkipedFirstFlip=1;
 	}
 	
-	// Is the system palette settable?
 	int MAGX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	{
 		return -1;
