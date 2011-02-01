@@ -52,6 +52,8 @@ static pp_start_params pp_st;
 static char * pp_dma_buffer = NULL;
 static unsigned int pp_dma_buffer_addr = 0;
 pp_buf pp_desc;
+static pp_init_params pp_init;
+static char * pp_dma_overlay_buffer = NULL;
 
 //FB
 static char * pp_frame_buffer = NULL;
@@ -59,6 +61,7 @@ static char * pp_frame_buffer = NULL;
 //FB&IPU id
 int fb_dev_fd;
 int fd_pp;
+
 
 //Init flag
 int vo_init=0;
@@ -68,6 +71,7 @@ int vo_init=0;
 #define VO_ALLOC_DMA_MEM	0x00000008
 #define VO_INIT_DB			0x00000010
 #define VO_ALLOC_IPU_BUF	0x00000020
+#define VO_INIT_OVERLAY		0x00000020
 
 //FB info structure
 struct fb_var_screeninfo fb_orig_vinfo;
@@ -97,8 +101,9 @@ void preinit()
 	vo_init = 0;
 	fb_dev_fd=fd_pp=0;
 	pp_dma_buffer=0;
+	pp_dma_overlay_buffer=0;
 	memset(&pp_desc, 0, sizeof(pp_desc));
-	
+	memset(&pp_init, 0, sizeof(pp_init));
 }
 
 //Open and preinicialization FB
@@ -239,7 +244,6 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 		printf("MAGX_VO: screen scalling or bpp convert\n");
 	}
 	
-	pp_init_params pp_init;
 	memset(&pp_init, 0, sizeof(pp_init));
 	
 	if ( pp_dma_count>1 )
@@ -416,17 +420,20 @@ void uninit()
 
 void flipBuffer()
 {
-	char *src, *dst;
-	int w, h;
-	int srcskip, dstskip;
+	if ( pp_dma_buffer )
+	{
+		char *src, *dst;
+		int w, h;
+		int srcskip, dstskip;
 
-	w = p_width*vo_pixel_size;
-	h = p_height;
-	src = pp_dma_buffer;
-	dst = pp_frame_buffer;
+		w = p_width*vo_pixel_size;
+		h = p_height;
+		src = pp_dma_buffer;
+		dst = pp_frame_buffer;
 
-	while ( h-- ) 
-		memcpy(dst, src, p_width);
+		while ( h-- ) 
+			memcpy(dst, src, p_width);
+	}
 }
 
 void flipPage()
@@ -501,6 +508,41 @@ void setOriginalBPP(bool org)
 		if ( vo_dbpp != in_dbpp )
 			setBppFB( in_dbpp );		
 	}
+}
+
+int reconfigureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_rot )
+{
+	if ( width==in_width && height==in_height && in_bpp==in_dbpp )
+		return 1;
+		
+	if ( vo_init&VO_INIT_IPU )
+	{		
+		if (ioctl(fd_pp, PP_IOCTL_UNINIT, NULL) < 0)
+			perror("MAGX_VO: PP_IOCTL_UNINIT");
+		vo_init^=VO_INIT_IPU;
+	}
+	if ( pp_dma_buffer )
+	{
+		int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);
+		munmap(pp_dma_buffer,size);
+		pp_dma_buffer=0;
+		if ( vo_init&VO_INIT_DB )
+		{
+			ipu_free(pp_dma_buffer_addr);
+			vo_init^=VO_INIT_DB;
+		}
+	}
+	if ( vo_init&VO_ALLOC_IPU_BUF )
+	{
+		if ( pp_st.mid.addr )
+			ipu_free(pp_st.mid.addr);
+		if ( pp_st.in.addr )
+			ipu_free(pp_st.in.addr);
+		memset(&pp_desc, 0, sizeof(pp_desc));
+		vo_init^=VO_ALLOC_IPU_BUF;
+	}
+	
+	return configureIPU( width, height, in_bpp, in_rot );
 }
 
 /// Info macro procedure

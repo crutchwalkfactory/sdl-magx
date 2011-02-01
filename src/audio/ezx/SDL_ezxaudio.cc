@@ -130,7 +130,7 @@ static void EZXAudio_WaitAudio(_THIS)
 
 static void EZXAudio_PlayAudio(_THIS)
 {
-	if ( !audio_dev )//Simulate write to device, if dont open
+	if ( !audio_dev || audio_dev->checkDevState()!=0 )//Simulate write to device, if dont open
 	{
 		SDL_Delay(2*mixlen);
 		return;

@@ -244,6 +244,7 @@ extern "C"
 		
 		if ( setVideoMode )
 		{
+			//set video mode
 			if ( bpp >= 24 )
 				printf("MAGX: Warning! Not recommended use bpp=%d, it very slow!\n", bpp);
 			setBppFB(bpp);
@@ -259,6 +260,14 @@ extern "C"
 		} else
 		{
 			//change video mode
+			setBppFB(bpp);
+			if ( !reconfigureIPU(width, height, bpp, screenRotation) )
+			{
+				SDL_SetError("No reconfigure IPU!");
+				return(NULL);				
+			}
+			if ( flags&SDL_DOUBLEBUF )
+				initDoubleBuffer();
 		}
 
 		current->flags = SDL_FULLSCREEN | (flags&SDL_DOUBLEBUF);
@@ -328,7 +337,7 @@ extern "C"
 		if ( addr==0 )
 		{
 			SDL_SetError("Video memory too fragmented");
-			return -1;			
+			return -1;
 		}
 		
 		printf("MAGX: Allocated %u bytes at %u\n", size, addr);
@@ -366,7 +375,7 @@ extern "C"
 	{
 	}
 	
-	static SkipedFirstFlip=0;
+	static int SkipedFirstFlip=0;
 	
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface)
 	{
