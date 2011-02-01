@@ -1,6 +1,8 @@
 #include "SDL_config.h"
 #include "SDL_mouse.h"
 
+#include <unistd.h>
+
 #include "SDL_magx_win.h"
 
 extern "C" 
@@ -68,17 +70,26 @@ extern "C"
 		if( !qApp ) 
 			return; 
 		qApp->processEvents();	
-		if ( my_suspended )	
-		{	
-			suspendAudio();
-			while ( my_suspended )
-				qApp->processEvents();	
-			resumeAudio();
-		}
 		if ( !my_focus )
 		{
-			while ( !my_focus )
-				qApp->processEvents();			
+			printf("MAGX_VO: Wait focus in...\n");
+			while ( !my_focus && !my_suspended )
+			{
+				qApp->processEvents();
+				sleep(1);
+			}
+		}
+		if ( my_suspended )	
+		{	
+			printf("MAGX_VO: Wait end suspend...\n");
+			suspendAudio();
+			while ( my_suspended )
+			{
+				qApp->processEvents();	
+				sleep(1);
+			}
+			resumeAudio();
+			printf("MAGX_VO: End suspend\n");
 		}
 	}
 

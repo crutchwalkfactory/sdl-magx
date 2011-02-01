@@ -37,6 +37,7 @@ extern int initFB();
 extern int initIPU();
 extern int setBppFB( uint32_t in_bpp );
 extern int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_rot );
+extern int reconfigureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_rot );
 extern int getAllDMAMem();
 extern void uninit();
 extern void flipPage();
