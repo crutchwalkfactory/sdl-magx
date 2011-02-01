@@ -45,11 +45,11 @@ while test $# -gt 0; do
       echo -I${prefix}/include/SDL -D_GNU_SOURCE=1 -DQWS -Dmain=SDL_main -DQWS -Dmain=SDL_main -D_REENTRANT
       ;;
     --libs)
-      echo -L${exec_prefix}/lib -Wl,-rpath,${libdir} -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-zn5/lib -Wl,--rpath,/arm-eabi/lib/ezx-zn5/lib -lpthread
+      echo -L${exec_prefix}/lib -Wl,-rpath,${libdir} -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-ve66/lib -Wl,--rpath,/arm-eabi/lib/ezx-ve66/lib -lpthread
       ;;
     --static-libs)
 #    --libs|--static-libs)
-      echo -L${exec_prefix}/lib -Wl,-rpath,${libdir} -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-zn5/lib -Wl,--rpath,/arm-eabi/lib/ezx-zn5/lib -lpthread  -lm -ldl -L/arm-eabi/lib/qt-zn5/lib -L/arm-eabi/lib/ezx-zn5/lib -ldl -lutil -lpthread -lezxappbase -lqte-mt -L/arm-eabi/lib/qt-zn5/lib -lezxsound -lpthread
+      echo -L${exec_prefix}/lib -Wl,-rpath,${libdir} -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-ve66/lib -Wl,--rpath,/arm-eabi/lib/ezx-ve66/lib -lpthread  -lm -ldl -L/arm-eabi/lib/qt-ve66/lib -L/arm-eabi/lib/ezx-ve66/lib -ldl -lpthread -lezxappbase -lqte-mt -L/arm-eabi/lib/qt-ve66/lib -lezxsound -lpthread
       ;;
     *)
       echo "${usage}" 1>&2

@@ -1,7 +1,7 @@
 #!/bin/bash
 source ezxenv.sh
 
-$MOC src/video/motoezx/SDL_QWin.h -o src/video/motoezx/mocSDL_QWin.cc
+$MOC src/video/magx/SDL_magx_win.h -o src/video/magx/moc_SDL_magx_win.cc
 
 make
 $STRIP build/.libs/libSDL-1.2.so.0.11.3

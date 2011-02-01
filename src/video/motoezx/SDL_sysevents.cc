@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#include <zapplication.h>
+
 #include <stdio.h>
 #include <string.h>
 #include "SDL_error.h"
@@ -29,19 +31,17 @@
 #include "SDL_lowvideo.h"
 #include "SDL_timer.h"
 
-#include <ZApplication.h>
-
 extern "C" {
 
-	void MAGX_PumpEvents(_THIS)
-	{
-		if( !qApp ) 
-			return; 
-		qApp->processEvents();
-	}
+void QT_PumpEvents(_THIS)
+{
+  if(!qApp) {
+    return; 
+  }
+  qApp->processEvents();
+}
 
-	void MAGX_InitOSKeymap(_THIS)
-	{
-	}
+void QT_InitOSKeymap(_THIS)
+{}
 
 }; /* Extern C */

@@ -390,12 +390,6 @@ void SDL_PumpEvents(void)
 
 /* Public functions */
 
-//extern "C" 
-//{
-	void suspendAudio();
-	void resumeAudio();
-//}
-
 int SDL_PollEvent (SDL_Event *event)
 {
 	SDL_PumpEvents();
@@ -403,30 +397,6 @@ int SDL_PollEvent (SDL_Event *event)
 	/* We can't return -1, just return 0 (no event) on error */
 	if ( SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS) <= 0 )
 		return 0;
-		
-	if (event->type == SDL_ACTIVEEVENT) 
-	{
-		if (event->active.state == SDL_APPINPUTFOCUS && !event->active.gain) 
-		{
-			suspendAudio();
-			int _r;
-			while (1)
-			{
-				_r = SDL_WaitEvent(event);
-				if (!_r)
-					continue;
-				if (event->type == SDL_QUIT)
-					return 1;
-				if (event->type != SDL_ACTIVEEVENT)
-					continue;
-				if (event->active.state == SDL_APPINPUTFOCUS && event->active.gain) 
-				{
-					resumeAudio();
-					break;
-				}
-			}
-		}
-	}
 	
 	return 1;
 }

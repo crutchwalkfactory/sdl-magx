@@ -10,6 +10,6 @@ Description: Simple DirectMedia Layer is a cross-platform multimedia library des
 Version: 1.2.14
 Requires:
 Conflicts:
-Libs: -L${libdir} -Wl,-rpath,${libdir} -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-zn5/lib -Wl,--rpath,/arm-eabi/lib/ezx-zn5/lib -lpthread
-Libs.private: -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-zn5/lib -Wl,--rpath,/arm-eabi/lib/ezx-zn5/lib -lpthread  -lm -ldl -L/arm-eabi/lib/qt-zn5/lib -L/arm-eabi/lib/ezx-zn5/lib -ldl -lutil -lpthread -lezxappbase -lqte-mt -L/arm-eabi/lib/qt-zn5/lib -lezxsound -lpthread
+Libs: -L${libdir} -Wl,-rpath,${libdir} -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-ve66/lib -Wl,--rpath,/arm-eabi/lib/ezx-ve66/lib -lpthread
+Libs.private: -lSDLmain -lSDLmain -lSDL  -Wl,--rpath,/arm-eabi/lib/qt-ve66/lib -Wl,--rpath,/arm-eabi/lib/ezx-ve66/lib -lpthread  -lm -ldl -L/arm-eabi/lib/qt-ve66/lib -L/arm-eabi/lib/ezx-ve66/lib -ldl -lpthread -lezxappbase -lqte-mt -L/arm-eabi/lib/qt-ve66/lib -lezxsound -lpthread
 Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -DQWS -Dmain=SDL_main -DQWS -Dmain=SDL_main -D_REENTRANT

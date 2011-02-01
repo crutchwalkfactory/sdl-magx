@@ -35,8 +35,7 @@
 
 #include "SDL_events.h"
 
-extern "C" 
-{
+extern "C" {
 #include "../../events/SDL_events_c.h"
 };
 
@@ -49,68 +48,95 @@ typedef enum {
 extern screenRotationT screenRotation;
 
 class QCopChannel;
-
-class SDL_ZWin : public ZKbMainWidget
+//class SDL_QWin : public QWidget
+class SDL_QWin : public ZKbMainWidget
 {
-Q_OBJECT
-public:
-	SDL_ZWin(const QSize& size);
-	virtual ~SDL_ZWin();
+ Q_OBJECT
+ private:
+  enum {
+    EZX_LEFT_BUTTON = 1,
+    EZX_RIGHT_BUTTON = 2
+  };
+  void QueueKey(QKeyEvent *e, int pressed);
+ public:
+  SDL_QWin(const QSize& size);
+  virtual ~SDL_QWin();
+  virtual bool shown(void) {
+    return isVisible();
+  }
+  /* If called, the next resize event will not be forwarded to SDL. */
+  virtual void inhibitResize(void) {
+    my_inhibit_resize = true;
+  }
+  void setImage(QImage *image);
+  void setOffset(int x, int y) {
+    my_offset = QPoint(x, y);
+  }
+  void GetXYOffset(int &x, int &y) {
+    x = my_offset.x();
+    y = my_offset.y();
+  }
+  QImage *image(void) { return my_image; }
+  
+  void setWFlags(WFlags flags) {
+    QWidget::setWFlags(flags);
+    my_flags = flags;
+  }
+  const QPoint& mousePos() const { return my_mouse_pos; }
+  void setMousePos(const QPoint& newpos);
 
-	void resume();
-	void suspend( int n=1 );
-
-	const QPoint& mousePos() const { return my_mouse_pos; }
-	void setMousePos(const QPoint& newpos);
-
-	bool SetVideoMode(uint32_t width, uint32_t height, uint32_t in_dbpp);
-	void * getFBBuf();
-	void flipScreen();
-	void flipScreen2();
-	void uninitVideo();
-	
-	bool isOK() { return isOk; }
-
+  void repaintRect(const QRect& rect);
+  bool isOK()
+  { return fbdev != -1 && vmem != (char *)-1; }
+  
  public slots:
-	void channel(const QCString &, const QByteArray &);
-
-	void slotRaise();
-	void slotReturnToIdle(int);
+  void channel(const QCString &, const QByteArray &);
+	void signalRaise();
+	void signalAskReturnToIdle(int);
+  //void clickAppIcon();
   
  protected:
-	void closeEvent(QCloseEvent *e);
-	bool eventFilter( QObject *, QEvent * );
-    void focusInEvent( QFocusEvent * );
-    void focusOutEvent( QFocusEvent * );
+  /* Handle resizing of the window */
+  virtual void resizeEvent(QResizeEvent *e);
+#ifdef MOTOEZX_TEST
+  void focusInEvent(QFocusEvent *);
+  void focusOutEvent(QFocusEvent *);
+#endif
+  void timerEvent(QTimerEvent *);
+  void closeEvent(QCloseEvent *e);
+  void mouseMoveEvent(QMouseEvent *e);
+  void mousePressEvent(QMouseEvent *e);
+  void mouseReleaseEvent(QMouseEvent *e);
+  void paintEvent(QPaintEvent *ev);
+  void keyPressEvent(QKeyEvent *e)   { QueueKey(e, 1); }
+  void keyReleaseEvent(QKeyEvent *e) { QueueKey(e, 0); }
+  //bool  eventFilter( QObject *, QEvent * );
+ private:
+  void init();
+  void suspend();
+  void resume();
+  
+  int keyUp();
+  int keyDown();
+  int keyLeft();
+  int keyRight();
 
-private:
-	int keyUp();
-	int keyDown();
-	int keyLeft();
-	int keyRight();
-
-	//Omega
-	#ifdef OMEGA_SUPPORT
-	int bOmgParse;
-	void omgScroll(QKeyEvent *e);
-	#endif
-
-	enum 
-	{
-		EZX_LEFT_BUTTON = 1,
-		EZX_RIGHT_BUTTON = 2,
-	};
-	void QueueKey(QKeyEvent *e, int pressed);
-
-	QPoint my_mouse_pos;
-	bool my_special;
-	QCopChannel *inCallChannel,*ounCallChannel;
-	int my_suspended;
-	SDL_keysym last;
-	bool last_mod;
-
-	bool isOk;
-	bool FocusOut;
+  int fbdev;
+  char *vmem;
+  size_t vmem_length;
+  QImage *my_image;
+  bool my_inhibit_resize;
+  QPoint my_offset;
+  QPoint my_mouse_pos;
+  WFlags my_flags;
+  unsigned int my_locked;
+  int cur_mouse_button;
+  bool my_special;
+  QCopChannel *qcop;
+  int my_timer;
+  bool my_suspended;
+  SDL_keysym last;
+  bool last_mod;
 };
 
-#endif
+#endif /* _SDL_QWin_h */

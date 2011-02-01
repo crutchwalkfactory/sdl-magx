@@ -2,7 +2,7 @@
 
 # libtool - Provide generalized library-building support services.
 # Generated automatically by config.status () 
-# Libtool was configured on host Ant-ON:
+# Libtool was configured on host MyBook:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
 #   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004, 2005,
@@ -43,7 +43,7 @@ macro_version=2.2.6
 macro_revision=1.3012
 
 # Assembler program.
-AS=arm_v6_vfp_le-as
+AS=arm-linux-gnu-as
 
 # DLL creation program.
 DLLTOOL=dlltool
@@ -89,13 +89,13 @@ EGREP="/bin/grep -E"
 FGREP="/bin/grep -F"
 
 # A BSD- or MS-compatible name lister.
-NM="/home/anton/e8-gcc/bin/arm-linux-gnueabi-nm -B"
+NM="/arm-eabi/bin/arm-linux-gnueabi-nm -B"
 
 # Whether we need soft or hard links.
 LN_S="ln -s"
 
 # What is the maximum length of a command?
-max_cmd_len=32768
+max_cmd_len=1572864
 
 # Object file suffix (normally "o").
 objext=o
@@ -123,19 +123,19 @@ deplibs_check_method="pass_all"
 file_magic_cmd="\$MAGIC_CMD"
 
 # The archiver.
-AR="arm_v6_vfp_le-ar"
+AR="arm-linux-gnu-ar"
 AR_FLAGS="cru"
 
 # A symbol stripping program.
-STRIP="arm_v6_vfp_le-strip"
+STRIP="arm-linux-gnu-strip"
 
 # Commands used to install an old-style archive.
-RANLIB="arm_v6_vfp_le-ranlib"
+RANLIB="arm-linux-gnu-ranlib"
 old_postinstall_cmds="chmod 644 \$oldlib~\$RANLIB \$oldlib"
 old_postuninstall_cmds=""
 
 # A C compiler.
-LTCC="arm_v6_vfp_le-gcc"
+LTCC="arm-linux-gnu-gcc"
 
 # LTCC compiler flags.
 LTCFLAGS="-g -O2 -I./include -D_GNU_SOURCE=1"
@@ -240,10 +240,10 @@ finish_eval=""
 hardcode_into_libs=yes
 
 # Compile-time system search path for libraries.
-sys_lib_search_path_spec="/home/anton/e8-gcc/lib/gcc/arm-linux-gnueabi/3.4.3 /home/anton/e8-gcc/lib/gcc /home/anton/e8-gcc/arm-linux-gnueabi/lib"
+sys_lib_search_path_spec="/home/anton/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3 /home/anton/arm-eabi/lib/gcc /arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3 /home/anton/arm-eabi/arm-linux-gnueabi/lib /arm-eabi/arm-linux-gnueabi/lib"
 
 # Run-time system search path for libraries.
-sys_lib_dlsearch_path_spec="/lib /usr/lib /lib/i486-linux-gnu /usr/lib/i486-linux-gnu /usr/lib/kde4/lib /usr/lib/alsa-lib /usr/local/lib "
+sys_lib_dlsearch_path_spec="/lib /usr/lib /usr/lib/nvidia-current /lib/i486-linux-gnu /usr/lib/i486-linux-gnu /lib/i686-linux-gnu /usr/lib/i686-linux-gnu /usr/lib/alsa-lib /usr/local/lib "
 
 # Whether dlopen is supported.
 dlopen_support=unknown
@@ -255,18 +255,18 @@ dlopen_self=unknown
 dlopen_self_static=unknown
 
 # Commands to strip libraries.
-old_striplib="arm_v6_vfp_le-strip --strip-debug"
-striplib="arm_v6_vfp_le-strip --strip-unneeded"
+old_striplib="arm-linux-gnu-strip --strip-debug"
+striplib="arm-linux-gnu-strip --strip-unneeded"
 
 
 # The linker used to build libraries.
-LD="arm_v6_vfp_le-ld"
+LD="arm-linux-gnu-ld"
 
 # Commands used to build an old-style archive.
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
 
 # A language specific compiler.
-CC="arm_v6_vfp_le-gcc"
+CC="arm-linux-gnu-gcc"
 
 # Is the compiler the GNU compiler?
 with_gcc=yes
@@ -8916,13 +8916,13 @@ build_old_libs=`case $build_libtool_libs in yes) echo no;; *) echo yes;; esac`
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
 # The linker used to build libraries.
-LD="arm_v6_vfp_le-ld"
+LD="arm-linux-gnu-ld"
 
 # Commands used to build an old-style archive.
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs~\$RANLIB \$oldlib"
 
 # A language specific compiler.
-CC="arm_v6_vfp_le-g++"
+CC="arm-linux-gnu-g++"
 
 # Is the compiler the GNU compiler?
 with_gcc=yes
@@ -9047,17 +9047,17 @@ file_list_spec=""
 hardcode_action=immediate
 
 # The directories searched by this compiler when creating a shared library.
-compiler_lib_search_dirs="/home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3 /home/anton/e8-gcc/bin/../lib/gcc /home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib"
+compiler_lib_search_dirs="/home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3 /home/anton/arm-eabi/bin/../lib/gcc /arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3 /home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib /arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib"
 
 # Dependencies to place before and after the objects being linked to
 # create a shared library.
-predep_objects="/home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib/crti.o /home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/crtbeginS.o"
-postdep_objects="/home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/crtendS.o /home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib/crtn.o"
+predep_objects="/home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib/crti.o /home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/crtbeginS.o"
+postdep_objects="/home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/crtendS.o /home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib/crtn.o"
 predeps=""
 postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3 -L/home/anton/e8-gcc/bin/../lib/gcc -L/home/anton/e8-gcc/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib"
+compiler_lib_search_path="-L/home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3 -L/home/anton/arm-eabi/bin/../lib/gcc -L/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3 -L/home/anton/arm-eabi/bin/../lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib -L/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/../../../../arm-linux-gnueabi/lib"
 
 # ### END LIBTOOL TAG CONFIG: CXX

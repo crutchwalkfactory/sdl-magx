@@ -24,9 +24,9 @@
 #include "SDL_lowvideo.h"
 
 /* Functions to be exported */
-extern void MAGX_FreeWMCursor(_THIS, WMcursor *cursor);
-extern WMcursor *MAGX_CreateWMCursor(_THIS,
+extern void QT_FreeWMCursor(_THIS, WMcursor *cursor);
+extern WMcursor *QT_CreateWMCursor(_THIS,
 		Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
-extern int MAGX_ShowWMCursor(_THIS, WMcursor *cursor);
-extern void MAGX_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
+extern int QT_ShowWMCursor(_THIS, WMcursor *cursor);
+extern void QT_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
 

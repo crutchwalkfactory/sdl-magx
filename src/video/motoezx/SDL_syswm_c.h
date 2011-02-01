@@ -24,7 +24,5 @@
 #include "SDL_lowvideo.h"
 
 /* Functions to be exported */
-extern void MAGX_SetWMCaption(_THIS, const char *title, const char *icon);
-extern int MAGX_IconifyWindow(_THIS);
-extern int MAGX_ToggleFullScreen(_THIS, int fullscreen);
-extern SDL_GrabMode MAGX_GrabInput(_THIS, SDL_GrabMode mode);
+extern void QT_SetWMCaption(_THIS, const char *title, const char *icon);
+

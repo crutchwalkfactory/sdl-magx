@@ -1024,57 +1024,40 @@ $(objects)/SDL_sysloadso.lo: ./src/loadso/dlopen/SDL_sysloadso.c \
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/loadso/dlopen/SDL_sysloadso.c  -o $@
 
 
-$(objects)/SDL_QWin.lo: ./src/video/motoezx/SDL_QWin.cc \
-	./include/SDL_active.h \
+$(objects)/SDL_magx_kernel.lo: ./src/video/magx/SDL_magx_kernel.cc \
+	./src/video/magx/ipu.h \
+	./src/video/magx/ipu_alloc.h \
+	./src/video/magx/mxc_pp.h \
+	./src/video/magx/mxcfb.h \
+
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_kernel.cc  -o $@
+
+
+$(objects)/SDL_magx_overlay.lo: ./src/video/magx/SDL_magx_overlay.cc \
 	./include/SDL_config.h \
+	./include/SDL_cpuinfo.h \
 	./include/SDL_error.h \
-	./include/SDL_events.h \
-	./include/SDL_joystick.h \
-	./include/SDL_keyboard.h \
-	./include/SDL_keysym.h \
-	./include/SDL_mouse.h \
-	./include/SDL_platform.h \
-	./include/SDL_quit.h \
-	./include/SDL_rwops.h \
-	./include/SDL_stdinc.h \
-	./include/SDL_video.h \
-	./include/begin_code.h \
-	./include/close_code.h \
-	./src/events/SDL_events_c.h \
-	./src/video/motoezx/SDL_QWin.h \
-
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/motoezx/SDL_QWin.cc  -o $@
-
-
-$(objects)/SDL_sysevents.lo: ./src/video/motoezx/SDL_sysevents.cc \
-	./include/SDL_active.h \
-	./include/SDL_config.h \
-	./include/SDL_error.h \
-	./include/SDL_events.h \
-	./include/SDL_joystick.h \
-	./include/SDL_keyboard.h \
-	./include/SDL_keysym.h \
 	./include/SDL_mouse.h \
 	./include/SDL_opengl.h \
 	./include/SDL_platform.h \
-	./include/SDL_quit.h \
 	./include/SDL_rwops.h \
 	./include/SDL_stdinc.h \
 	./include/SDL_syswm.h \
-	./include/SDL_timer.h \
 	./include/SDL_version.h \
 	./include/SDL_video.h \
 	./include/begin_code.h \
 	./include/close_code.h \
 	./src/events/../video/../video/SDL_sysvideo.h \
-	./src/events/SDL_events_c.h \
-	./src/video/motoezx/SDL_QWin.h \
-	./src/video/motoezx/SDL_lowvideo.h \
+	./src/video/SDL_stretch_c.h \
+	./src/video/SDL_yuvfuncs.h \
+	./src/video/magx/SDL_magx_kernel.h \
+	./src/video/magx/SDL_magx_overlay.h \
+	./src/video/magx/ipu_alloc.h \
 
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/motoezx/SDL_sysevents.cc  -o $@
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_overlay.cc  -o $@
 
 
-$(objects)/SDL_sysmouse.lo: ./src/video/motoezx/SDL_sysmouse.cc \
+$(objects)/SDL_magx_sys.lo: ./src/video/magx/SDL_magx_sys.cc \
 	./include/SDL_active.h \
 	./include/SDL_config.h \
 	./include/SDL_error.h \
@@ -1095,14 +1078,15 @@ $(objects)/SDL_sysmouse.lo: ./src/video/motoezx/SDL_sysmouse.cc \
 	./include/close_code.h \
 	./src/events/../video/../video/SDL_sysvideo.h \
 	./src/events/SDL_events_c.h \
-	./src/video/motoezx/SDL_QWin.h \
-	./src/video/motoezx/SDL_lowvideo.h \
-	./src/video/motoezx/SDL_sysmouse_c.h \
+	./src/video/magx/SDL_magx_sys.h \
+	./src/video/magx/SDL_magx_video.h \
+	./src/video/magx/SDL_magx_win.h \
+	./src/video/magx/ipu.h \
 
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/motoezx/SDL_sysmouse.cc  -o $@
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_sys.cc  -o $@
 
 
-$(objects)/SDL_sysvideo.lo: ./src/video/motoezx/SDL_sysvideo.cc \
+$(objects)/SDL_magx_video.lo: ./src/video/magx/SDL_magx_video.cc \
 	./include/SDL_active.h \
 	./include/SDL_config.h \
 	./include/SDL_endian.h \
@@ -1127,44 +1111,19 @@ $(objects)/SDL_sysvideo.lo: ./src/video/motoezx/SDL_sysvideo.cc \
 	./src/events/SDL_events_c.h \
 	./src/video/SDL_blit.h \
 	./src/video/SDL_pixels_c.h \
-	./src/video/motoezx/SDL_QWin.h \
-	./src/video/motoezx/SDL_lowvideo.h \
-	./src/video/motoezx/SDL_sysevents_c.h \
-	./src/video/motoezx/SDL_sysmouse_c.h \
-	./src/video/motoezx/SDL_syswm_c.h \
+	./src/video/magx/SDL_magx_kernel.h \
+	./src/video/magx/SDL_magx_logo.c \
+	./src/video/magx/SDL_magx_overlay.h \
+	./src/video/magx/SDL_magx_sys.h \
+	./src/video/magx/SDL_magx_video.h \
+	./src/video/magx/SDL_magx_win.h \
+	./src/video/magx/ipu.h \
+	./src/video/magx/ipu_alloc.h \
 
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/motoezx/SDL_sysvideo.cc  -o $@
-
-
-$(objects)/SDL_syswm.lo: ./src/video/motoezx/SDL_syswm.cc \
-	./include/SDL_active.h \
-	./include/SDL_config.h \
-	./include/SDL_error.h \
-	./include/SDL_events.h \
-	./include/SDL_joystick.h \
-	./include/SDL_keyboard.h \
-	./include/SDL_keysym.h \
-	./include/SDL_mouse.h \
-	./include/SDL_opengl.h \
-	./include/SDL_platform.h \
-	./include/SDL_quit.h \
-	./include/SDL_rwops.h \
-	./include/SDL_stdinc.h \
-	./include/SDL_syswm.h \
-	./include/SDL_version.h \
-	./include/SDL_video.h \
-	./include/begin_code.h \
-	./include/close_code.h \
-	./src/events/../video/../video/SDL_sysvideo.h \
-	./src/events/SDL_events_c.h \
-	./src/video/motoezx/SDL_QWin.h \
-	./src/video/motoezx/SDL_lowvideo.h \
-	./src/video/motoezx/SDL_syswm_c.h \
-
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/motoezx/SDL_syswm.cc  -o $@
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_video.cc  -o $@
 
 
-$(objects)/mocSDL_QWin.lo: ./src/video/motoezx/mocSDL_QWin.cc \
+$(objects)/SDL_magx_win.lo: ./src/video/magx/SDL_magx_win.cc \
 	./include/SDL_active.h \
 	./include/SDL_config.h \
 	./include/SDL_error.h \
@@ -1181,9 +1140,39 @@ $(objects)/mocSDL_QWin.lo: ./src/video/motoezx/mocSDL_QWin.cc \
 	./include/begin_code.h \
 	./include/close_code.h \
 	./src/events/SDL_events_c.h \
-	./src/video/motoezx/SDL_QWin.h \
+	./src/video/magx/SDL_magx_kernel.h \
+	./src/video/magx/SDL_magx_win.h \
+	./src/video/magx/ipu.h \
 
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/motoezx/mocSDL_QWin.cc  -o $@
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_win.cc  -o $@
+
+
+$(objects)/ipu_alloc.lo: ./src/video/magx/ipu_alloc.cc \
+	./src/video/magx/ipu_alloc.h \
+
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/ipu_alloc.cc  -o $@
+
+
+$(objects)/moc_SDL_magx_win.lo: ./src/video/magx/moc_SDL_magx_win.cc \
+	./include/SDL_active.h \
+	./include/SDL_config.h \
+	./include/SDL_error.h \
+	./include/SDL_events.h \
+	./include/SDL_joystick.h \
+	./include/SDL_keyboard.h \
+	./include/SDL_keysym.h \
+	./include/SDL_mouse.h \
+	./include/SDL_platform.h \
+	./include/SDL_quit.h \
+	./include/SDL_rwops.h \
+	./include/SDL_stdinc.h \
+	./include/SDL_video.h \
+	./include/begin_code.h \
+	./include/close_code.h \
+	./src/video/magx/SDL_magx_win.h \
+	./src/video/magx/ipu.h \
+
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/moc_SDL_magx_win.cc  -o $@
 
 
 $(objects)/SDL_ezxaudio.lo: ./src/audio/ezx/SDL_ezxaudio.cc \
@@ -1204,6 +1193,7 @@ $(objects)/SDL_ezxaudio.lo: ./src/audio/ezx/SDL_ezxaudio.cc \
 	./src/audio/SDL_audiomem.h \
 	./src/audio/SDL_sysaudio.h \
 	./src/audio/ezx/SDL_ezxaudio.h \
+	./src/audio/ezx/ezxsound.h \
 
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/audio/ezx/SDL_ezxaudio.cc  -o $@
 
@@ -1308,5 +1298,5 @@ $(objects)/SDL_syscdrom.lo: ./src/cdrom/dummy/SDL_syscdrom.c \
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/cdrom/dummy/SDL_syscdrom.c  -o $@
 
 
-$(objects)/SDL_motoezx_main.o: ./src/main/motoezx/SDL_motoezx_main.cc
-	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/main/motoezx/SDL_motoezx_main.cc -o $@
+$(objects)/SDL_motoezx_main.o: ./src/main/magx/SDL_motoezx_main.cc
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/main/magx/SDL_motoezx_main.cc -o $@

@@ -706,9 +706,6 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 			#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 				color <<= 8;
 			#endif
-      #if SDL_VIDEO_DRIVER_MOTOEZX
-        //color = ((color & 0x1f) << 1) | ((color & 0x7e0) << 1) | ((color & 0xf800) << 2);
-      #endif
 			for ( y=dstrect->h; y; --y ) {
 				Uint8 *pixels = row;
 				for ( x=dstrect->w; x; --x ) {

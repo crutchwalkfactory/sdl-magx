@@ -991,6 +991,7 @@ enable_video_wscons
 enable_video_aalib
 enable_video_caca
 enable_video_qtopia
+enable_video_magx
 enable_video_motoezx
 enable_audio_ezx
 enable_video_picogui
@@ -1727,6 +1728,7 @@ Optional Features:
   --enable-video-aalib    use AAlib video driver [default=no]
   --enable-video-caca     use libcaca video driver [default=no]
   --enable-video-qtopia   use Qtopia video driver [default=no]
+  --enable-video-magx     use MAGX IPU+FB video driver [default=no]
   --enable-video-motoezx  use Moto/EzX video driver [default=no]
   --enable-audio-ezx      use Motorola/EZX audio driver [default=no]
   --enable-video-picogui  use PicoGUI video driver [default=no]
@@ -26287,6 +26289,99 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
     fi
 }
 
+CheckMAGX()
+{
+    # Check whether --enable-video-magx was given.
+if test "${enable_video_magx+set}" = set; then
+  enableval=$enable_video_magx;
+else
+  enable_video_magx=no
+fi
+
+    if test x$enable_video = xyes -a x$enable_video_magx = xyes; then
+        { echo "$as_me:$LINENO: checking for MAGX support" >&5
+echo $ECHO_N "checking for MAGX support... $ECHO_C" >&6; }
+        video_magx=no
+        MAGX_FLAGS="-nostdinc -I${TOOLPREFIX}/include -I${TOOLPREFIX}/arm-linux-gnueabi/include -I${TOOLPREFIX}/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I${QTDIR}/include -I${EZXDIR}/include -DNO_DEBUG -fno-rtti -fno-exceptions -march=armv6j -mtune=arm1136jf-s -mfpu=vfp"
+        ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+        OLD_CXX="$CXXFLAGS"
+        CXXFLAGS="$MAGX_FLAGS"
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+         #include <ZApplication.h>
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+        video_magx=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        CXXFLAGS="$OLD_CXX"
+        { echo "$as_me:$LINENO: result: $video_magx" >&5
+echo "${ECHO_T}$video_magx" >&6; }
+        if test x$video_magx = xyes; then
+            cat >>confdefs.h <<\_ACEOF
+#define SDL_VIDEO_DRIVER_MAGX 1
+_ACEOF
+
+            SOURCES="$SOURCES $srcdir/src/video/magx/*.cc"
+            SDLMAIN_SOURCES="$srcdir/src/main/magx/*.cc"
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $MAGX_FLAGS"
+            SDL_CFLAGS="$SDL_CFLAGS -DQWS -Dmain=SDL_main"
+            SDL_LIBS="-lSDLmain $SDL_LIBS -Wl,--rpath,${QTDIR}/lib -Wl,--rpath,${EZXDIR}/lib"
+	    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L${QTDIR}/lib -L${EZXDIR}/lib -ldl -lpthread -lezxappbase -lqte-mt"
+            have_video=yes
+        fi
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+    fi
+}
+
 CheckMotoEzX()
 {
     # Check whether --enable-video-motoezx was given.
@@ -30187,8 +30282,9 @@ _ACEOF
         CheckAAlib
         CheckCaca
         CheckQtopia
+        CheckMAGX
         CheckMotoEzX
-	CheckEZXAudio
+		CheckEZXAudio
         CheckPicoGUI
         CheckOpenGLX11
         CheckInputEvents

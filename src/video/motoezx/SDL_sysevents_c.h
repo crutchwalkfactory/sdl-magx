@@ -27,5 +27,5 @@
    of the native video subsystem (SDL_sysvideo.c)
 */
 
-extern void MAGX_InitOSKeymap(_THIS);
-extern void MAGX_PumpEvents(_THIS);
+extern void QT_InitOSKeymap(_THIS);
+extern void QT_PumpEvents(_THIS);

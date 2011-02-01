@@ -27,26 +27,9 @@ extern "C" {
 
 #include "SDL_syswm_c.h"
 
-void MAGX_SetWMCaption(_THIS, const char *title, const char *icon)
+void QT_SetWMCaption(_THIS, const char *title, const char *icon)
 {
 	SDL_Win->setCaption(title);
 }
-
-int MAGX_IconifyWindow(_THIS) 
-{
-	SDL_Win->suspend();
-	return true;
-}
-
-int MAGX_ToggleFullScreen(_THIS, int fullscreen)
-{
-	return -1;
-}
-
-SDL_GrabMode MAGX_GrabInput(_THIS, SDL_GrabMode mode) 
-{
-	return mode;
-}
-
 
 }; /* Extern C */

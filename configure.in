@@ -1540,6 +1540,41 @@ AC_HELP_STRING([--enable-video-qtopia], [use Qtopia video driver [[default=no]]]
 }
 
 dnl Set up the MotoEzX video driver if enabled
+CheckMAGX()
+{
+    AC_ARG_ENABLE(video-magx,
+AC_HELP_STRING([--enable-video-magx], [use MAGX FB + IPU video driver [[default=no]]]),
+                  , enable_video_magx=no)
+    if test x$enable_video = xyes -a x$enable_video_magx = xyes; then
+        AC_MSG_CHECKING(for MAGX support)
+        video_magx=no
+        MAGX_FLAGS="-nostdinc -I${TOOLPREFIX}/include -I${EZXDIR}/include -I${TOOLPREFIX}/arm-linux-gnueabi/include -I${TOOLPREFIX}/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I${QTDIR}/include/ -DNO_DEBUG -fno-rtti -fno-exceptions"
+        AC_LANG_CPLUSPLUS
+        OLD_CXX="$CXXFLAGS"
+        CXXFLAGS="$MAGX_FLAGS"
+        AC_TRY_COMPILE([
+         #include <ZApplication.h>
+        ],[
+        ],[
+        video_magx=yes
+        ])
+        CXXFLAGS="$OLD_CXX"
+        AC_MSG_RESULT($video_magx)
+        if test x$video_magx = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_MAGX)
+            SOURCES="$SOURCES $srcdir/src/video/magx/*.cc"
+            SDLMAIN_SOURCES="$srcdir/src/main/magx/*.cc"
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $MAGX_FLAGS"
+            SDL_CFLAGS="$SDL_CFLAGS -DQWS -Dmain=SDL_main"
+            SDL_LIBS="-lSDLmain $SDL_LIBS -Wl,--rpath,${QTDIR}/lib -Wl,--rpath,${EZXDIR}/lib"
+			EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L${QTDIR}/lib -ldl -lpthread -lezxappbase -lqte-mt"
+            have_video=yes
+        fi
+        AC_LANG_C
+    fi
+}
+
+dnl Set up the MotoEzX video driver if enabled
 CheckMotoEzX()
 {
     AC_ARG_ENABLE(video-motoezx,
@@ -2401,8 +2436,9 @@ case "$host" in
         CheckAAlib
         CheckCaca
         CheckQtopia
+        CheckMAGX
         CheckMotoEzX
-	CheckEZXAudio
+		CheckEZXAudio
         CheckPicoGUI
         CheckOpenGLX11
         CheckInputEvents
