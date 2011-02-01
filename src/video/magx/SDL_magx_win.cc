@@ -201,7 +201,11 @@ SDL_MainWindow::SDL_MainWindow()
 	setFocus();
 	
 	#ifdef MPH_MODE_INT_PHONE
-	setMorphMode(MPH_MODE_INT_PHONE);
+	int keypadmod = MPH_MODE_INT_PHONE;
+	char * envString = SDL_getenv("SDL_QT_KEYPADMODE");
+	if ( envString )
+		keypadmod = atoi(envString);	  
+	setMorphMode(keypadmod);
 	#endif
 	
 	qApp->installEventFilter( this );
