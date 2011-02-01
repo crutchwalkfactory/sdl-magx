@@ -90,7 +90,7 @@ extern "C"
 		device->PumpEvents = MAGX_PumpEvents;
 		
 		//Overlay
-		device->CreateYUVOverlay = SDL_CreateYUV_HW;
+		device->CreateYUVOverlay = NULL;//SDL_CreateYUV_HW;
 
 		//WM
 		device->SetIcon = NULL;
