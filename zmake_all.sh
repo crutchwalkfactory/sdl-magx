@@ -13,7 +13,7 @@ cp build/.libs/libSDL-1.2.so.0.11.3 libSDL-1.2.so.0
 }
 
 source ezxenv.sh
-export VER=B1
+export VER=B2
 
 export QTDIR=/arm-eabi/lib/qt-ve66
 export EZXDIR=/arm-eabi/lib/ezx-ve66

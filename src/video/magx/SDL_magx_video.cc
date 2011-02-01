@@ -366,15 +366,23 @@ extern "C"
 	{
 	}
 	
+	static SkipedFirstFlip=0;
+	
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface)
 	{
-		flipPage();
+		if ( SkipedFirstFlip )
+			flipPage();
+		else
+			SkipedFirstFlip=1;
 	}
 	
 	// Various screen update functions available
 	static void MAGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 	{
-		flipPage();
+		if ( SkipedFirstFlip )
+			flipPage();
+		else
+			SkipedFirstFlip=1;
 	}
 	
 	// Is the system palette settable?
