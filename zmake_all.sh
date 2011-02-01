@@ -4,16 +4,17 @@ MAKE()
 {
 make clean
 rm build/.libs/libSDL-1.2.so.0.11.3
-$MOC src/video/motoezx/SDL_QWin.h -o src/video/motoezx/mocSDL_QWin.cc
 make
 $STRIP build/.libs/libSDL-1.2.so.0.11.3
-rm libSDL-1.2.so.0
 cp build/.libs/libSDL-1.2.so.0.11.3 libSDL-1.2.so.0
 7z a libSDL-1.2_$VER\_$MOD.7z  libSDL-1.2.so.0 
+rm libSDL-1.2.so.0
 }
 
 source ezxenv.sh
 export VER=B2
+
+$MOC src/video/magx/SDL_magx_win.h -o src/video/magx/moc_SDL_magx_win.cc
 
 export QTDIR=/arm-eabi/lib/qt-ve66
 export EZXDIR=/arm-eabi/lib/ezx-ve66

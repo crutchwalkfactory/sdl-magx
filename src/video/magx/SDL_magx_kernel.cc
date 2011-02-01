@@ -11,6 +11,7 @@
 //		by Alexey Kuznetsov <kuznet@ms2.inr.ac.ru>   
 //		(C) 2008
 //
+
 #include <linux/fb.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -53,7 +54,6 @@ static char * pp_dma_buffer = NULL;
 static unsigned int pp_dma_buffer_addr = 0;
 pp_buf pp_desc;
 static pp_init_params pp_init;
-static char * pp_dma_overlay_buffer = NULL;
 
 //FB
 static char * pp_frame_buffer = NULL;
@@ -93,15 +93,16 @@ void preinit()
 	static int setSignal=1;
 	if ( setSignal )
 	{
+		atexit(uninit);
 		signal(SIGTERM, signal_handler);
 		signal(SIGKILL, signal_handler);
 		signal(SIGQUIT, signal_handler);
+		signal(SIGILL,  signal_handler);
 		setSignal = 0;
 	}
 	vo_init = 0;
 	fb_dev_fd=fd_pp=0;
 	pp_dma_buffer=0;
-	pp_dma_overlay_buffer=0;
 	memset(&pp_desc, 0, sizeof(pp_desc));
 	memset(&pp_init, 0, sizeof(pp_init));
 }
@@ -374,6 +375,9 @@ int getAllDMAMem()
 
 void uninit()
 {
+	if (vo_init==0)
+		return;
+	
 	if ( pp_dma_buffer )
 	{
 		int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);

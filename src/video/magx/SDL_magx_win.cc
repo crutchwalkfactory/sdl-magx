@@ -176,11 +176,10 @@ void CargarTeclas()
 
 SDL_MainWindow::SDL_MainWindow()
     :ZKbMainWidget ( ZHeader::MAINDISPLAY_HEADER, 0, "SDL_MainWidget", 0),
-    my_mouse_pos(0, 0), my_special(false), last_mod(false)
+    my_mouse_pos(0, 0), my_special(false), last_mod(false), rot(SDL_QT_NO_ROTATION)
 {
 	my_suspended = false;
 	my_focus = true;
-	screenRotation = SDL_QT_NO_ROTATION;
 
 	CargarTeclas();
 	
@@ -294,11 +293,11 @@ void SDL_MainWindow::closeEvent(QCloseEvent *e)
 
 void SDL_MainWindow::setMousePos(const QPoint &pos) 
 {
-	if (screenRotation == SDL_QT_NO_ROTATION)
+	if (rot == SDL_QT_NO_ROTATION)
 		my_mouse_pos = pos;		
-	else if (screenRotation == SDL_QT_ROTATION_270)
+	else if (rot == SDL_QT_ROTATION_270)
 		my_mouse_pos = QPoint(height()-pos.y(), pos.x());
-	else if (screenRotation == SDL_QT_ROTATION_90)
+	else if (rot == SDL_QT_ROTATION_90)
 		my_mouse_pos = QPoint(pos.y(), width()-pos.x());
 }
 
@@ -364,23 +363,23 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 			scancode = my_special ? SmyCENTER : myCENTER;
 			break;
 		case KEYCODE_LEFT:
-			if (screenRotation == SDL_QT_ROTATION_270) scancode = keyUp();
-			else if (screenRotation == SDL_QT_ROTATION_90) scancode = keyDown();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyUp();
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyDown();
 			else scancode = keyLeft();
 			break;
 		case KEYCODE_UP:
-			if (screenRotation == SDL_QT_ROTATION_270) scancode = keyRight();
-			else if (screenRotation == SDL_QT_ROTATION_90) scancode = keyLeft();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyRight();
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyLeft();
 			else scancode = keyUp();
 			break;
 		case KEYCODE_RIGHT:
-			if (screenRotation == SDL_QT_ROTATION_270) scancode = keyDown();
-			else if (screenRotation == SDL_QT_ROTATION_90) scancode = keyUp();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyDown();
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyUp();
 			else scancode = keyRight();
 			break;
 		case KEYCODE_DOWN:
-			if (screenRotation == SDL_QT_ROTATION_270) scancode = keyLeft();
-			else if (screenRotation == SDL_QT_ROTATION_90) scancode = keyRight();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyLeft();
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyRight();
 			else scancode = keyDown();
 			break;
 		case KEYCODE_SIDE_SELECT:
@@ -525,9 +524,9 @@ void SDL_MainWindow::omgScroll(QKeyEvent *e)
 	if (step != 0)
 	{
 		step = (step>0)?1:-1;
-		if (screenRotation == SDL_QT_ROTATION_270) 
+		if (rot == SDL_QT_ROTATION_270) 
 			my_mouse_pos.setX(my_mouse_pos.x()-step*10);
-		if (screenRotation == SDL_QT_ROTATION_90)
+		if (rot == SDL_QT_ROTATION_90)
 			my_mouse_pos.setX(my_mouse_pos.x()+step*10);	
 		
 		if (my_mouse_pos.x()<0) my_mouse_pos.setX(0);

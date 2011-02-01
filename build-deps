@@ -1025,36 +1025,13 @@ $(objects)/SDL_sysloadso.lo: ./src/loadso/dlopen/SDL_sysloadso.c \
 
 
 $(objects)/SDL_magx_kernel.lo: ./src/video/magx/SDL_magx_kernel.cc \
+	./src/video/magx/SDL_magx_kernel.h \
 	./src/video/magx/ipu.h \
 	./src/video/magx/ipu_alloc.h \
 	./src/video/magx/mxc_pp.h \
 	./src/video/magx/mxcfb.h \
 
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_kernel.cc  -o $@
-
-
-$(objects)/SDL_magx_overlay.lo: ./src/video/magx/SDL_magx_overlay.cc \
-	./include/SDL_config.h \
-	./include/SDL_cpuinfo.h \
-	./include/SDL_error.h \
-	./include/SDL_mouse.h \
-	./include/SDL_opengl.h \
-	./include/SDL_platform.h \
-	./include/SDL_rwops.h \
-	./include/SDL_stdinc.h \
-	./include/SDL_syswm.h \
-	./include/SDL_version.h \
-	./include/SDL_video.h \
-	./include/begin_code.h \
-	./include/close_code.h \
-	./src/events/../video/../video/SDL_sysvideo.h \
-	./src/video/SDL_stretch_c.h \
-	./src/video/SDL_yuvfuncs.h \
-	./src/video/magx/SDL_magx_kernel.h \
-	./src/video/magx/SDL_magx_overlay.h \
-	./src/video/magx/ipu_alloc.h \
-
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_overlay.cc  -o $@
 
 
 $(objects)/SDL_magx_sys.lo: ./src/video/magx/SDL_magx_sys.cc \
@@ -1113,12 +1090,12 @@ $(objects)/SDL_magx_video.lo: ./src/video/magx/SDL_magx_video.cc \
 	./src/video/SDL_pixels_c.h \
 	./src/video/magx/SDL_magx_kernel.h \
 	./src/video/magx/SDL_magx_logo.c \
-	./src/video/magx/SDL_magx_overlay.h \
 	./src/video/magx/SDL_magx_sys.h \
 	./src/video/magx/SDL_magx_video.h \
 	./src/video/magx/SDL_magx_win.h \
 	./src/video/magx/ipu.h \
 	./src/video/magx/ipu_alloc.h \
+	./src/video/magx/mxc_pp.h \
 
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_video.cc  -o $@
 
@@ -1143,6 +1120,7 @@ $(objects)/SDL_magx_win.lo: ./src/video/magx/SDL_magx_win.cc \
 	./src/video/magx/SDL_magx_kernel.h \
 	./src/video/magx/SDL_magx_win.h \
 	./src/video/magx/ipu.h \
+	./src/video/magx/mxc_pp.h \
 
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/SDL_magx_win.cc  -o $@
 
