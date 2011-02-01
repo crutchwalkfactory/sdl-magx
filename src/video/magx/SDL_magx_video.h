@@ -1,6 +1,7 @@
 #ifndef SDL_MAGX_VIDEO
 #define SDL_MAGX_VIDEO
 
+#include "SDL_magx_win.h"
 #include "../SDL_sysvideo.h"
 
 // Hidden "this" pointer for the video functions

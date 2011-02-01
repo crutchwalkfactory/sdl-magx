@@ -1,23 +1,14 @@
 #include "SDL_config.h"
 
-#include "SDL_video.h"
 #include "SDL_cpuinfo.h"
-#include "./../SDL_stretch_c.h"
+//#include "./../SDL_stretch_c.h"
 #include "./../SDL_yuvfuncs.h"
 
-#include "SDL_magx_overlay.h"
 #include "SDL_magx_kernel.h"
+#include "SDL_magx_win.h"
 #include "ipu_alloc.h"
 
 #include <sys/mman.h>
-
-/* The functions used to manipulate software video overlays */
-static struct private_yuvhwfuncs sw_yuvfuncs = {
-	SDL_LockYUV_HW,
-	SDL_UnlockYUV_HW,
-	SDL_DisplayYUV_HW,
-	SDL_FreeYUV_HW
-};
 
 /* RGB conversion lookup tables */
 struct private_yuvhwdata {
@@ -835,6 +826,18 @@ static int free_bits_at_bottom( Uint32 a )
     return 1 + free_bits_at_bottom ( a >> 1);
 }
 
+extern "C" 
+{
+
+#include "SDL_magx_overlay.h"
+
+/* The functions used to manipulate software video overlays */
+static struct private_yuvhwfuncs sw_yuvfuncs = {
+	SDL_LockYUV_HW,
+	SDL_UnlockYUV_HW,
+	SDL_DisplayYUV_HW,
+	SDL_FreeYUV_HW
+};
 
 SDL_Overlay *SDL_CreateYUV_HW(_THIS, int width, int height, Uint32 format, SDL_Surface *display)
 {
@@ -1196,4 +1199,6 @@ void SDL_FreeYUV_HW(_THIS, SDL_Overlay *overlay)
 		SDL_free(swdata);
 		overlay->hwdata = NULL;
 	}
+}
+
 }

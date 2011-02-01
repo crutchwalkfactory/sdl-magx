@@ -2,6 +2,7 @@
 #define SDL_FB_IPU
 
 #include <linux/fb.h>
+#include "mxc_pp.h"
 
 //FB&IPU id
 extern int fb_dev_fd;
@@ -10,15 +11,12 @@ extern int fd_pp;
 //Info
 extern bool isRotate();
 extern bool isScalling();
-extern unsigned int iIPUMemSize;
-extern unsigned int iIPUMemStart;
-extern unsigned int iIPUMemFreeSize;
-extern unsigned int iIPUMemFreeStart;
-extern unsigned int iFBMemSize;
+extern bool isBppConvert();
 
 extern struct fb_var_screeninfo fb_orig_vinfo;
 extern struct fb_var_screeninfo fb_vinfo;
 extern struct fb_fix_screeninfo fb_finfo;
+extern pp_buf pp_desc;
 
 #define hw_dbpp (fb_orig_vinfo.bits_per_pixel)
 #define vo_dbpp (fb_vinfo.bits_per_pixel)
@@ -32,6 +30,7 @@ extern int in_dbpp;
 #define p_height (fb_orig_vinfo.yres)
 #define p_width (fb_orig_vinfo.xres)
 
+#define uIPUMemSize (pp_desc.size)
 //Control
 extern void preinit();
 extern int initFB();

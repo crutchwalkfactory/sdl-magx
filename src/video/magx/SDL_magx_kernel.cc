@@ -50,7 +50,8 @@ static int in_width = 0;
 //IPU (PreProcessor)
 static pp_start_params pp_st;
 static char * pp_dma_buffer = NULL;
-static pp_buf pp_desc;
+static unsigned int pp_dma_buffer_addr = 0;
+pp_buf pp_desc;
 
 //FB
 static char * pp_frame_buffer = NULL;
@@ -65,15 +66,8 @@ int vo_init=0;
 #define VO_INIT_IPU			0x00000002
 #define VO_CONF_IPU			0x00000004
 #define VO_ALLOC_DMA_MEM	0x00000008
-#define VO_INIT_DB			0x00000010	
-
-//DMA mem info
-unsigned int iIPUMemSize;
-unsigned int iIPUMemStart;
-unsigned int iIPUMemFreeSize;
-unsigned int iIPUMemFreeStart;
-
-unsigned int iFBMemSize;
+#define VO_INIT_DB			0x00000010
+#define VO_ALLOC_IPU_BUF	0x00000020
 
 //FB info structure
 struct fb_var_screeninfo fb_orig_vinfo;
@@ -100,10 +94,11 @@ void preinit()
 		signal(SIGQUIT, signal_handler);
 		setSignal = 0;
 	}
-	fb_dev_fd=fd_pp=0;	
-	iIPUMemFreeSize=iIPUMemSize=0;
-	iIPUMemFreeStart=iIPUMemStart=0;
+	vo_init = 0;
+	fb_dev_fd=fd_pp=0;
 	pp_dma_buffer=0;
+	memset(&pp_desc, 0, sizeof(pp_desc));
+	
 }
 
 //Open and preinicialization FB
@@ -129,8 +124,6 @@ int initFB()
 	}
 
 	printf("MAGX_VO: FB %u@%p\n", fb_finfo.smem_len, (void*)fb_finfo.smem_start);
-
-	iFBMemSize = fb_finfo.smem_len;
 	
 	if ((pp_frame_buffer = (char*)mmap(0, p_width*p_height*hw_pixel_size, PROT_READ | PROT_WRITE,
 				 MAP_SHARED, fb_dev_fd, 0)) == MAP_FAILED) 
@@ -310,17 +303,14 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 	{
 		pp_st.mid = pp_desc;
 		pp_st.mid.size = IPU_MEM_ALIGN(p_width*p_height*vo_pixel_size);
-		iIPUMemFreeSize-=pp_st.mid.size;
-		iIPUMemFreeStart+=pp_st.mid.size;
+		pp_st.mid.addr = ipu_malloc( pp_st.mid.size );
 	}
 	if ( pp_dma_count>0 )
 	{
 		pp_st.in.index = -1;
-		pp_st.in.addr = iIPUMemFreeStart;
 		pp_st.in.size = IPU_MEM_ALIGN(vwidth*vheight*in_pixel_size);
-		iIPUMemFreeSize-=pp_st.in.size;
-		iIPUMemFreeStart+=pp_st.in.size;
-		
+		pp_st.in.addr = ipu_malloc(pp_st.in.size);
+
 		pp_dma_buffer = (char*)mmap (NULL, pp_st.in.size, 
 						PROT_READ | PROT_WRITE, MAP_SHARED, 
 							fd_pp, pp_st.in.addr);
@@ -328,6 +318,8 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 		pp_st.out.index = -1;
 		pp_st.out.size = IPU_MEM_ALIGN(p_width*p_height*vo_pixel_size);
 		pp_st.out.addr = fb_finfo.smem_start;
+		
+		vo_init|=VO_ALLOC_IPU_BUF;
 	}
 	
 	return 1;
@@ -354,19 +346,12 @@ int getAllDMAMem()
 		bMemAllowed = (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs)==0);
 
 		if ( bMemAllowed )
-		{
-			iIPUMemFreeSize=iIPUMemSize=pp_reqbufs.req_size;
 			break;
-		}
 		
 		// Free mem
 		pp_reqbufs.count = 0;
 		ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs);		
 	}
-	printf("MAGX_VO: IPU memory: %uM\n", iIPUMemSize/(1024*1024));
-	
-	if ( iIPUMemSize<=0 )
-		return 0;
 	
 	pp_desc.index = 0;
 	if (ioctl(fd_pp, PP_IOCTL_QUERYBUF, &pp_desc) != 0) 
@@ -374,7 +359,10 @@ int getAllDMAMem()
 		perror("MAGX_VO: PP_IOCTL_QUERYBUF failed");
 		return 0;
 	}
-	iIPUMemFreeStart=iIPUMemStart=pp_desc.addr;
+	
+	printf("MAGX_VO: IPU memory: %uM\n", pp_desc.size/(1024*1024));
+	
+	ipu_pool_initialize(pp_desc.addr, pp_desc.size, IPU_PAGE_ALIGN);
 	
 	vo_init|=VO_ALLOC_DMA_MEM;
 	return 1;
@@ -384,9 +372,19 @@ void uninit()
 {
 	if ( pp_dma_buffer )
 	{
-		munmap(pp_dma_buffer, IPU_MEM_ALIGN(in_width*in_height*in_pixel_size));
+		int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);
+		munmap(pp_dma_buffer,size);
 		pp_dma_buffer=0;
+		if ( vo_init&VO_INIT_DB )
+			ipu_free(pp_dma_buffer_addr);
 	}
+	if ( vo_init&VO_ALLOC_IPU_BUF )
+	{
+		if ( pp_st.mid.addr )
+			ipu_free(pp_st.mid.addr);
+		if ( pp_st.in.addr )
+			ipu_free(pp_st.in.addr);
+	}	
 	if ( vo_init&VO_ALLOC_DMA_MEM )
 	{
 		pp_reqbufs_params pp_reqbufs;
@@ -467,20 +465,24 @@ bool initDoubleBuffer()
 	if ( pp_dma_buffer )
 		return 1;
 		
-	int size_buffer = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);	
+	unsigned int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);	
+	pp_dma_buffer_addr = ipu_malloc( size );
 	
-	pp_dma_buffer = (char*)mmap (NULL, size_buffer, 
-						PROT_READ | PROT_WRITE, MAP_SHARED, 
-							fd_pp, iIPUMemFreeStart);
-	if (pp_dma_buffer == MAP_FAILED) 
+	if ( pp_dma_buffer_addr==0 )
 	{
-		fprintf(stderr,"MAGX_VO: mmap IPU 0\n");
+		printf("MAGX_VO: No memory for DB\n");
 		return 0;
 	}
-	memset(pp_dma_buffer, 0, size_buffer);
-
-	iIPUMemFreeStart+=size_buffer;
-	iIPUMemFreeSize-=size_buffer;
+	
+	pp_dma_buffer = (char*)mmap (NULL, size, 
+						PROT_READ | PROT_WRITE, MAP_SHARED, 
+							fd_pp, pp_dma_buffer_addr);
+	if (pp_dma_buffer == MAP_FAILED) 
+	{
+		fprintf(stderr,"MAGX_VO: mmap IPU\n");
+		return 0;
+	}
+	memset(pp_dma_buffer, 0, size);
 	
 	printf("MAGX_VO: alloced IPU buffer\n");
 	
@@ -522,5 +524,9 @@ bool isScalling()
 			(  isRotate() && (in_width>p_height || in_height>p_width) )  );
 }
 
+bool isBppConvert()
+{
+	return (vo_dbpp!=in_dbpp);
+}
 
 ////////////////////////////////////////////////////////////////////////

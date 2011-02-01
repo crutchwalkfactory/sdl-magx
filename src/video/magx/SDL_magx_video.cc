@@ -90,7 +90,7 @@ extern "C"
 		device->PumpEvents = MAGX_PumpEvents;
 		
 		//Overlay
-		device->CreateYUVOverlay = NULL;
+		device->CreateYUVOverlay = SDL_CreateYUV_HW;
 
 		//WM
 		device->SetIcon = NULL;
@@ -175,7 +175,7 @@ extern "C"
 		// Fill in our hardware acceleration capabilities
 		_this->info.current_w = p_width;
 		_this->info.current_h = p_height;
-		_this->info.video_mem = iFBMemSize/1024;
+		_this->info.video_mem = uIPUMemSize/1024;
 		_this->info.wm_available = 1;
 		_this->info.hw_available = 1;
 		_this->info.current_w = p_width;
@@ -254,9 +254,11 @@ extern "C"
 			}
 			if ( flags&SDL_DOUBLEBUF )
 				initDoubleBuffer();
-			ipu_pool_initialize(iIPUMemFreeStart, iIPUMemFreeSize, IPU_PAGE_ALIGN);
 			
 			setVideoMode=0;
+		} else
+		{
+			//change video mode
 		}
 
 		current->flags = SDL_FULLSCREEN | (flags&SDL_DOUBLEBUF);
@@ -265,10 +267,10 @@ extern "C"
 		current->pitch = SDL_CalculatePitch(current);
 		current->pixels = pixels();
 		
-		int mode = (isRotate()?1:0) + (isScalling()?1:0);
+		int mode = (isRotate()?1:0) + (isScalling()?1:0) + (isBppConvert()?1:0);
 		
-		if ( mode!=2 )
-			current->flags |= SDL_HWSURFACE;		
+		if ( mode<2 )
+			current->flags |= SDL_HWSURFACE;
 		else
 			current->flags |= SDL_SWSURFACE;
 			

@@ -49,7 +49,7 @@ int ipu_pool_initialize(unsigned long int memPool, unsigned long int poolSize, u
 
 	gAllocatedDesc = (memDesc *)malloc(sizeof(memDesc));
 	if (!gAllocatedDesc) {
-		printf("ipu_pool_initialize : kmalloc failed \n");
+		printf("ipu_pool_initialize : malloc failed \n");
 		return (-1);
 	}
 
@@ -74,7 +74,7 @@ unsigned long int ipu_malloc(unsigned long int size)
 	memDesc *currentDesc = NULL;
 	unsigned long int pages = (size + gAlignment - 1) / gAlignment;
 
-	printf("ipu_malloc alloacte page %x  gTotalPages %x\n", pages,
+	printf("ipu_malloc alloacte page %d  gTotalPages %d\n", pages,
 		gTotalPages);
 
 	if ((size == 0) || (pages > gTotalPages))
@@ -82,7 +82,7 @@ unsigned long int ipu_malloc(unsigned long int size)
 	
 	currentDesc = (memDesc *)malloc(sizeof(memDesc));
 	if (!currentDesc) {
-		printf("ipu_malloc: kmalloc failed \n");
+		printf("ipu_malloc: malloc failed \n");
 		return 0;
 	}
 
@@ -92,7 +92,7 @@ unsigned long int ipu_malloc(unsigned long int size)
 		currentDesc->start = 0;
 		currentDesc->end = pages;
 		currentDesc->next = NULL;
-		printf("ipu_malloc 1st current->start %x current->end %x\n",
+		printf("ipu_malloc: 1st current->start %d current->end %d\n",
 			currentDesc->start, currentDesc->end);
 		return (gIPUPoolStart + currentDesc->start * gAlignment);
 	}
@@ -106,7 +106,7 @@ unsigned long int ipu_malloc(unsigned long int size)
 			currentDesc->end = currentDesc->start + pages;
 			currentDesc->next = nextDesc;
 			prevDesc->next = currentDesc;
-			printf("find middle cur->start %x cur->end %x\n",
+			printf("ipu_malloc: find middle cur->start %d cur->end %d\n",
 				currentDesc->start, currentDesc->end);
 			break;
 		}
@@ -116,7 +116,7 @@ unsigned long int ipu_malloc(unsigned long int size)
 	/* Do not find the free spot inside the chain, append to the end */
 	if (!prevDesc->next) {
 		if (pages > (gTotalPages - prevDesc->end)) {
-			printf("page %x gTotalPages %x prevDesc->end %x",
+			printf("ipu_malloc: page %d gTotalPages %d prevDesc->end %d\n",
 				pages, gTotalPages, prevDesc->end);
 			return 0;
 		} else {
@@ -124,7 +124,7 @@ unsigned long int ipu_malloc(unsigned long int size)
 			currentDesc->end = currentDesc->start + pages;
 			currentDesc->next = NULL;
 			prevDesc->next = currentDesc;
-			printf("append end:cur->start %x cur->end %x\n",
+			printf("ipu_malloc: append end:cur->start %d cur->end %d\n",
 				currentDesc->start, currentDesc->end);
 		}
 	}
@@ -147,16 +147,16 @@ void ipu_free(unsigned long int physical)
 	memDesc *nextDesc = NULL;
 	unsigned long int pages = (physical - gIPUPoolStart) / gAlignment;
 
-	printf("ipu_free alloacte page %x \n", pages);
+	printf("ipu_free alloacte page %d \n", pages);
 	/* Protect the memory pool data structures. */
 	prevDesc = gAllocatedDesc;
 	while (prevDesc->next) {
 		nextDesc = prevDesc->next;
 		if (nextDesc->start == pages) {
 			prevDesc->next = nextDesc->next;
-			printf("ipu_free next->start %x next->end %x \n",
+			printf("ipu_free next->start %x next->end %d \n",
 				nextDesc->start, nextDesc->end);
-			printf("ipu_free prev->start %x prev->end %x \n",
+			printf("ipu_free prev->start %x prev->end %d \n",
 				prevDesc->start, prevDesc->end);
 			free(nextDesc);
 			break;
