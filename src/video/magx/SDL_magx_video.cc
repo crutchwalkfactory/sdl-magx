@@ -128,8 +128,6 @@ extern "C"
 	MAGX_Available, MAGX_CreateDevice
 	};
 	
-	#include <sys/ioctl.h>
-	
 	int MAGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	{
 		// Create the window

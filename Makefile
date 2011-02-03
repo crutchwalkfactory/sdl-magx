@@ -21,7 +21,7 @@ distfile = $(distdir).tar.gz
 SHELL	= /bin/bash
 CC      = arm-linux-gnu-gcc
 INCLUDE = -I./include
-CFLAGS  = -g -O2 
+CFLAGS  = -g -O3 
 EXTRA_CFLAGS = -I./include -D_GNU_SOURCE=1 -nostdinc -I$(TOOLPREFIX)/include -I$(TOOLPREFIX)/arm-linux-gnueabi/include -I$(TOOLPREFIX)/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I$(QTDIR)/include -I$(EZXDIR)/include -DNO_DEBUG -fno-rtti -fno-exceptions -march=armv6j -mtune=arm1136jf-s -mfpu=vfp -nostdinc -I$(TOOLPREFIX)/include -I$(TOOLPREFIX)/arm-linux-gnueabi/include -I$(TOOLPREFIX)/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I$(QTDIR)/include -I$(EZXDIR)/include -DNO_DEBUG -fno-rtti -fno-exceptions -D_REENTRANT -DHAVE_LINUX_VERSION_H
 LDFLAGS = 
 EXTRA_LDFLAGS =  -lm -ldl -L$(QTDIR)/lib -L$(EZXDIR)/lib -ldl -lpthread -lezxappbase -lqte-mt -L$(QTDIR)/lib -lezxsound -lpthread

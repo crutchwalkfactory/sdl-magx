@@ -20,6 +20,7 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -71,7 +72,7 @@ int vo_init=0;
 #define VO_ALLOC_DMA_MEM	0x00000008
 #define VO_INIT_DB			0x00000010
 #define VO_ALLOC_IPU_BUF	0x00000020
-#define VO_INIT_OVERLAY		0x00000020
+#define VO_INIT_OVERLAY		0x00000040
 
 //FB info structure
 struct fb_var_screeninfo fb_orig_vinfo;
@@ -312,18 +313,28 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 	}
 	if ( pp_dma_count>0 )
 	{
-		pp_st.in.index = -1;
-		pp_st.in.size = IPU_MEM_ALIGN(vwidth*vheight*in_pixel_size);
-		pp_st.in.addr = ipu_malloc(pp_st.in.size);
-
-		pp_dma_buffer = (char*)mmap (NULL, pp_st.in.size, 
-						PROT_READ | PROT_WRITE, MAP_SHARED, 
-							fd_pp, pp_st.in.addr);
-		
 		pp_st.out.index = -1;
 		pp_st.out.size = IPU_MEM_ALIGN(p_width*p_height*vo_pixel_size);
-		pp_st.out.addr = fb_finfo.smem_start;
+		pp_st.out.addr = fb_finfo.smem_start;	
 		
+		pp_st.in.size = IPU_MEM_ALIGN(vwidth*vheight*in_pixel_size);
+		pp_st.in.index = -1;
+		//Try locate input buffer in video memory
+		if ( pp_st.in.size <= fb_finfo.smem_len-pp_st.out.size )
+		{
+			printf("MAGX_VO: Input buffer located in video memory!\n");
+			pp_st.in.addr = fb_finfo.smem_start+pp_st.out.size;
+			pp_dma_buffer = (char*)mmap (NULL, pp_st.in.size, 
+							PROT_READ | PROT_WRITE, MAP_SHARED, 
+								fb_dev_fd, pp_st.in.addr);	
+		} else
+		{
+			pp_st.in.addr = ipu_malloc(pp_st.in.size);
+			pp_dma_buffer = (char*)mmap (NULL, pp_st.in.size, 
+							PROT_READ | PROT_WRITE, MAP_SHARED, 
+								fd_pp, pp_st.in.addr);			
+		}
+
 		vo_init|=VO_ALLOC_IPU_BUF;
 	}
 	
@@ -373,26 +384,43 @@ int getAllDMAMem()
 	return 1;
 }
 
-void uninit()
+void uninitIPU()
 {
-	if (vo_init==0)
-		return;
-	
+	if ( vo_init&VO_INIT_IPU )
+	{		
+		if (ioctl(fd_pp, PP_IOCTL_UNINIT, NULL) < 0)
+			perror("MAGX_VO: PP_IOCTL_UNINIT");
+		vo_init^=VO_INIT_IPU;
+	}
 	if ( pp_dma_buffer )
 	{
 		int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);
 		munmap(pp_dma_buffer,size);
 		pp_dma_buffer=0;
 		if ( vo_init&VO_INIT_DB )
+		{
 			ipu_free(pp_dma_buffer_addr);
+			vo_init^=VO_INIT_DB;
+		}
 	}
 	if ( vo_init&VO_ALLOC_IPU_BUF )
 	{
 		if ( pp_st.mid.addr )
 			ipu_free(pp_st.mid.addr);
-		if ( pp_st.in.addr )
+		if ( pp_st.in.addr && pp_st.in.index==-1 )
 			ipu_free(pp_st.in.addr);
-	}	
+		memset(&pp_desc, 0, sizeof(pp_desc));
+		vo_init^=VO_ALLOC_IPU_BUF;
+	}
+}
+
+void uninit()
+{
+	if (vo_init==0)
+		return;
+	
+	uninitIPU();
+	
 	if ( vo_init&VO_ALLOC_DMA_MEM )
 	{
 		pp_reqbufs_params pp_reqbufs;
@@ -400,12 +428,8 @@ void uninit()
 		if (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs) < 0)
 			perror("MAGX_VO: uninit PP_IOCTL_REQBUFS");
 	}
-	if ( vo_init&VO_INIT_IPU )
-	{		
-		if (ioctl(fd_pp, PP_IOCTL_UNINIT, NULL) < 0)
-			perror("MAGX_VO: PP_IOCTL_UNINIT");
+	if ( fd_pp )
 		close(fd_pp);
-	}
 	if ( vo_init&VO_INIT_FB )
 	{	
 		if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
@@ -519,32 +543,7 @@ int reconfigureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t i
 	if ( width==in_width && height==in_height && in_bpp==in_dbpp )
 		return 1;
 		
-	if ( vo_init&VO_INIT_IPU )
-	{		
-		if (ioctl(fd_pp, PP_IOCTL_UNINIT, NULL) < 0)
-			perror("MAGX_VO: PP_IOCTL_UNINIT");
-		vo_init^=VO_INIT_IPU;
-	}
-	if ( pp_dma_buffer )
-	{
-		int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);
-		munmap(pp_dma_buffer,size);
-		pp_dma_buffer=0;
-		if ( vo_init&VO_INIT_DB )
-		{
-			ipu_free(pp_dma_buffer_addr);
-			vo_init^=VO_INIT_DB;
-		}
-	}
-	if ( vo_init&VO_ALLOC_IPU_BUF )
-	{
-		if ( pp_st.mid.addr )
-			ipu_free(pp_st.mid.addr);
-		if ( pp_st.in.addr )
-			ipu_free(pp_st.in.addr);
-		memset(&pp_desc, 0, sizeof(pp_desc));
-		vo_init^=VO_ALLOC_IPU_BUF;
-	}
+	uninitIPU();
 	
 	return configureIPU( width, height, in_bpp, in_rot );
 }
