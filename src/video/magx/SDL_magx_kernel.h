@@ -27,6 +27,7 @@ extern int in_dbpp;
 #define vo_pixel_size bppToPixelSize(vo_dbpp)
 #define in_pixel_size bppToPixelSize(in_dbpp)
 
+///Size of screen
 #define p_height (fb_orig_vinfo.yres)
 #define p_width (fb_orig_vinfo.xres)
 

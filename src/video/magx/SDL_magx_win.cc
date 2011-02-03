@@ -181,6 +181,10 @@ SDL_MainWindow::SDL_MainWindow()
 	my_suspended = false;
 	my_focus = true;
 
+	#ifdef QT_SUPPORT_LANDSCAPE_MODE
+	setOrientationLandscape(true);
+	#endif
+
 	CargarTeclas();
 	
 	last.scancode = 0;

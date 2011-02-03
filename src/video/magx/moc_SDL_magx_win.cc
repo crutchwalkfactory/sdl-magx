@@ -1,7 +1,7 @@
 /****************************************************************************
 ** SDL_MainWindow meta object code from reading C++ file 'SDL_magx_win.h'
 **
-** Created: Tue Feb 1 22:35:01 2011
+** Created: Thu Feb 3 20:31:25 2011
 **      by: The Qt MOC ($Id: qt/src/moc/moc.y   2.3.8   edited 2004-08-05 $)
 **
 ** WARNING! All changes made in this file will be lost!
