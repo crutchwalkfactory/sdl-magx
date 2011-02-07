@@ -174,7 +174,8 @@ static int MAGXAudio_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	{
 		frame_ticks = (float)(spec->samples*1000)/spec->freq;
 		next_frame = SDL_GetTicks()+frame_ticks;
-	}
+	} else
+		frame_ticks=0;
 	
 	return(0);
 }
@@ -201,13 +202,16 @@ static void MAGXAudio_PlayAudio(_THIS)
 	
 	if ( id==0 || AAL_in_call_capture(id) )
 		return;
-		
-	int i;
-	for (i=1; i<buf_size/4; i++ )
-		if ( ((int*)aalBuf.buffer)[i]==0 && ((int*)aalBuf.buffer)[i-1]==0 && ((int*)aalBuf.buffer)[i-2]==0 )
-			break;
+	
+	if ( frame_ticks )
+	{
+		int i;
+		for (i=1; i<buf_size/4; i++ )
+			if ( ((int*)aalBuf.buffer)[i]==0 && ((int*)aalBuf.buffer)[i-1]==0 && ((int*)aalBuf.buffer)[i-2]==0 )
+				break;
 
-	aalBuf.length=i*4;
+		aalBuf.length=i*4;
+	}
 	AAL_write(id, &aalBuf, &i);
 
 	if ( i!=0 )
