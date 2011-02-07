@@ -82,6 +82,12 @@ struct fb_fix_screeninfo fb_finfo;
 //In info
 int in_dbpp;
 
+#if 0
+#define DebugFunction() printf("MAGX_VO: kernel - %s()\n",__FUNCTION__) 
+#else
+#define DebugFunction()
+#endif
+
 void signal_handler(int sig) 
 {
 	perror("MyExept\n");
@@ -91,6 +97,8 @@ void signal_handler(int sig)
 
 void preinit()
 {
+	DebugFunction();
+	
 	static int setSignal=1;
 	if ( setSignal )
 	{
@@ -111,6 +119,8 @@ void preinit()
 //Open and preinicialization FB
 int initFB()
 {
+	DebugFunction();
+	
 	if ((fb_dev_fd = open("/dev/fb/0", O_RDWR)) == -1) 
 	{
 		printf("MAGX_VO: Can't open /dev/fb/0: %s\n", strerror(errno));
@@ -154,6 +164,8 @@ err_out:
 
 int initIPU()
 {
+	DebugFunction();
+	
 	if ((fd_pp = open("/dev/alt_mxc_ipu_pp", O_RDWR, 0)) < 0) 
 	{
 		perror("MAGX_VO: open(/dev/alt_mxc_ipu_pp)");
@@ -172,6 +184,8 @@ int initIPU()
 
 int setBppFB( uint32_t in_bpp )
 {
+	DebugFunction();
+	
 	if ( !(vo_init&VO_INIT_FB) )
 		return 0;
 	
@@ -206,6 +220,8 @@ int setBppFB( uint32_t in_bpp )
 
 int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_rot )
 {
+	DebugFunction();
+	
 	if ( !(vo_init&VO_INIT_IPU) )
 	{
 		printf("MAGX_VO: before configure need init IPU!\n");
@@ -343,6 +359,8 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 
 int getAllDMAMem()
 {
+	DebugFunction();
+	
 	if ( !(vo_init&VO_INIT_IPU) )
 	{
 		printf("MAGX_VO: before get DMA mem need init IPU!\n");
@@ -386,6 +404,8 @@ int getAllDMAMem()
 
 void uninitIPU()
 {
+	DebugFunction();
+	
 	if ( vo_init&VO_INIT_IPU )
 	{		
 		if (ioctl(fd_pp, PP_IOCTL_UNINIT, NULL) < 0)
@@ -416,6 +436,8 @@ void uninitIPU()
 
 void uninit()
 {
+	DebugFunction();
+	
 	if (vo_init==0)
 		return;
 	
@@ -448,6 +470,8 @@ void uninit()
 
 void flipBuffer()
 {
+	DebugFunction();
+	
 	if ( pp_dma_buffer )
 	{
 		char *src, *dst;
@@ -466,6 +490,8 @@ void flipBuffer()
 
 void flipPage()
 {
+	DebugFunction();
+	
 	if ( pp_st.in.index != -1 )
 	{
 		flipBuffer();
@@ -495,6 +521,8 @@ void flipPage()
 
 bool initDoubleBuffer()
 {
+	DebugFunction();
+	
 	printf("MAGX_VO: Create IPU buffer for DB\n");
 	
 	if ( pp_dma_buffer )
@@ -527,6 +555,8 @@ bool initDoubleBuffer()
 
 void setOriginalBPP(bool org)
 {
+	DebugFunction();
+	
 	if (org)
 	{
 		if ( vo_dbpp != hw_dbpp )
@@ -540,6 +570,8 @@ void setOriginalBPP(bool org)
 
 int reconfigureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_rot )
 {
+	DebugFunction();
+	
 	if ( width==in_width && height==in_height && in_bpp==in_dbpp )
 		return 1;
 		
@@ -552,6 +584,8 @@ int reconfigureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t i
 
 char * pixels()
 {
+	DebugFunction();
+	
 	if ( pp_dma_buffer )
 		return pp_dma_buffer;
 	else

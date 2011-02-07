@@ -7,6 +7,12 @@
 
 #include "SDL_magx_kernel.h"
 
+#if 0
+#define DebugFunction() printf("MAGX_VO: win - %s()\n",__FUNCTION__) 
+#else
+#define DebugFunction()
+#endif
+
 extern "C" {
 #include "../../events/SDL_events_c.h"
 };
@@ -178,6 +184,8 @@ SDL_MainWindow::SDL_MainWindow()
     :ZKbMainWidget ( ZHeader::MAINDISPLAY_HEADER, 0, "SDL_MainWidget", 0),
     my_mouse_pos(0, 0), my_special(false), last_mod(false), rot(SDL_QT_NO_ROTATION)
 {
+	DebugFunction();
+	
 	my_suspended = false;
 	my_focus = true;
 
@@ -216,12 +224,16 @@ SDL_MainWindow::SDL_MainWindow()
 
 SDL_MainWindow::~SDL_MainWindow() 
 {
+	DebugFunction();
+	
 	delete inCallChannel;
 	delete ounCallChannel;
 }
 
 void SDL_MainWindow::channel(const QCString &msg, const QByteArray &)
 {
+	DebugFunction();
+	
  	if ( msg == "show()" ) 
 	{	
 		resume();
@@ -242,19 +254,19 @@ void SDL_MainWindow::channel(const QCString &msg, const QByteArray &)
 
 void SDL_MainWindow::slotRaise()
 {
-	printf("MAGX: signal raise\n");
+	printf("MAGX_VO: signal raise\n");
 	resume();
 }
 
 void SDL_MainWindow::slotReturnToIdle(int)
 {
-	printf("MAGX: signal askReturnToIdle\n");
+	printf("MAGX_VO: signal askReturnToIdle\n");
 	suspend();
 }
 
 void SDL_MainWindow::suspend( int n )
 {
-	printf("MAGX: suspend\n");
+	printf("MAGX_VO: suspend\n");
 	if (my_suspended)
 	{
 		hide();  
@@ -266,7 +278,7 @@ void SDL_MainWindow::suspend( int n )
 
 void SDL_MainWindow::focusInEvent( QFocusEvent * )
 {
-	printf("MAGX: focus in\n");	
+	printf("MAGX_VO: focus in\n");	
 	setOriginalBPP(0);
 	my_focus=1;
 	SDL_PrivateAppActive(true, SDL_APPINPUTFOCUS);
@@ -274,7 +286,7 @@ void SDL_MainWindow::focusInEvent( QFocusEvent * )
 
 void SDL_MainWindow::focusOutEvent( QFocusEvent * )
 {
-	printf("MAGX: focus out\n");
+	printf("MAGX_VO: focus out\n");
 	my_focus=0;
 	setOriginalBPP(1);	
 	SDL_PrivateAppActive(false, SDL_APPINPUTFOCUS);
@@ -283,7 +295,7 @@ void SDL_MainWindow::focusOutEvent( QFocusEvent * )
 void SDL_MainWindow::resume()
 {
 	if(!my_suspended || needSuspend()) return;
-	printf("MAGX: resume\n");
+	printf("MAGX_VO: resume\n");
 	show();
 	
 	my_suspended = 0;
@@ -291,12 +303,16 @@ void SDL_MainWindow::resume()
 
 void SDL_MainWindow::closeEvent(QCloseEvent *e) 
 {
+	DebugFunction();
+	
 	SDL_PrivateQuit();
 	e->ignore();
 }
 
 void SDL_MainWindow::setMousePos(const QPoint &pos) 
 {
+	DebugFunction();
+	
 	if (rot == SDL_QT_NO_ROTATION)
 		my_mouse_pos = pos;		
 	else if (rot == SDL_QT_ROTATION_270)
@@ -307,26 +323,28 @@ void SDL_MainWindow::setMousePos(const QPoint &pos)
 
 inline int SDL_MainWindow::keyUp()
 {
-  return my_special ? SmyUP : myUP;
+	return my_special ? SmyUP : myUP;
 }
 
 inline int SDL_MainWindow::keyDown()
 {
-  return my_special ? SmyDOWN : myDOWN;
+	return my_special ? SmyDOWN : myDOWN;
 }
 
 inline int SDL_MainWindow::keyLeft()
 {
-  return my_special ? SmyLEFT : myLEFT;
+	return my_special ? SmyLEFT : myLEFT;
 }
 
 inline int SDL_MainWindow::keyRight()
 {
-  return my_special ? SmyRIGHT : myRIGHT;
+	return my_special ? SmyRIGHT : myRIGHT;
 }
 
 bool SDL_MainWindow::eventFilter(QObject* o, QEvent* pEvent)
 {
+	DebugFunction();
+	
     if (QEvent::KeyPress == pEvent->type())
     {
 		QueueKey((QKeyEvent*)pEvent, 1);
@@ -347,6 +365,8 @@ bool SDL_MainWindow::eventFilter(QObject* o, QEvent* pEvent)
  */
 void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 {  
+	DebugFunction();
+	
 	SDL_keysym keysym;
 	int scancode = e->key();
 
@@ -523,6 +543,8 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 #ifdef OMEGA_SUPPORT
 void SDL_MainWindow::omgScroll(QKeyEvent *e)
 {
+	DebugFunction();
+	
 	int step = e->step();
 	//if ( (bOmgParse==2) && (step != 0) )
 	if (step != 0)
