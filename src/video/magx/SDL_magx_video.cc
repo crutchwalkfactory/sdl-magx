@@ -13,6 +13,12 @@
 #include "SDL_magx_logo.c"
 #include "ipu_alloc.h"
 
+#if 0
+#define DebugFunction() printf("MAGX_VO: video - %s()\n",__FUNCTION__) 
+#else
+#define DebugFunction()
+#endif
+
 extern "C" 
 {
 
@@ -47,17 +53,23 @@ extern "C"
 	// FB driver bootstrap functions
 	static int MAGX_Available(void)
 	{
+		DebugFunction();
+		
 		return 1;
 	}
 
 	static void MAGX_DeleteDevice(SDL_VideoDevice *device)
 	{
+		DebugFunction();
+		
 		SDL_free(device->hidden);
 		SDL_free(device);
 	}
 
 	static SDL_VideoDevice *MAGX_CreateDevice(int devindex)
 	{
+		DebugFunction();
+		
 		SDL_VideoDevice *device;
 
 		// Initialize all variables that we clean on shutdown
@@ -130,6 +142,8 @@ extern "C"
 	
 	int MAGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	{
+		DebugFunction();
+		
 		// Create the window
 		SDL_MainWin = new SDL_MainWindow();
 		qApp->setMainWidget(SDL_MainWin);
@@ -177,8 +191,6 @@ extern "C"
 		_this->info.video_mem = uIPUMemSize/1024;
 		_this->info.wm_available = 1;
 		_this->info.hw_available = 1;
-		_this->info.current_w = p_width;
-		_this->info.current_h = p_height;
 		
 		// Fill video mode list
 		for ( int i=0; i<3; i++ )
@@ -215,6 +227,8 @@ extern "C"
 	// We support any dimension at our bit-depth
 	SDL_Rect **MAGX_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 	{
+		DebugFunction();
+		
 		if(format->BitsPerPixel==15)
 			return SDL_modelist[4];
 		else
@@ -225,8 +239,8 @@ extern "C"
 	SDL_Surface *MAGX_SetVideoMode(_THIS, SDL_Surface *current,
 							int width, int height, int bpp, Uint32 flags)
 	{
-		printf("MAGX: SetVideoMode width=%d height=%d bpp=%d\n", width, height, bpp);
-			
+		printf("MAGX_VO: SetVideoMode width=%d height=%d bpp=%d\n", width, height, bpp);
+	
 		if ( flags&SDL_OPENGL ) 
 		{
 			SDL_SetError("OpenGL not supported");
@@ -307,6 +321,8 @@ extern "C"
 	// Update the current mouse state and position
 	void MAGX_UpdateMouse(_THIS)
 	{
+		DebugFunction();
+		
 		QPoint point(-1, -1);
 		if ( SDL_MainWin->isActiveWindow() ) 
 			point = SDL_MainWin->mousePos();
@@ -383,6 +399,7 @@ extern "C"
 	
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface)
 	{
+		DebugFunction();
 		if ( SkipedFirstFlip )
 			flipPage();
 		else
@@ -392,6 +409,7 @@ extern "C"
 	// Various screen update functions available
 	static void MAGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 	{
+		DebugFunction();
 		if ( SkipedFirstFlip )
 			flipPage();
 		else
@@ -400,11 +418,14 @@ extern "C"
 	
 	int MAGX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	{
+		DebugFunction();
 		return -1;
 	}
 
 	void MAGX_VideoQuit(_THIS)
 	{
+		DebugFunction();
+		
 		uninit();
 		
 		_this->screen->pixels = NULL;

@@ -22,6 +22,7 @@
 #include "ipu_alloc.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 static unsigned long int gIPUPoolStart = 0;
 static unsigned long int gTotalPages = 0;

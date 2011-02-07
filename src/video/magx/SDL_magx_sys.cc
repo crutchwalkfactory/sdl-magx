@@ -5,6 +5,12 @@
 
 #include "SDL_magx_win.h"
 
+#if 0
+#define DebugFunction() printf("MAGX_VO: sys - %s()\n",__FUNCTION__) 
+#else
+#define DebugFunction()
+#endif
+
 extern "C" 
 {
 	#include "../../events/SDL_events_c.h"
@@ -13,22 +19,30 @@ extern "C"
 
 	void MAGX_SetWMCaption(_THIS, const char *title, const char *icon)
 	{
+		DebugFunction();
+		
 		SDL_MainWin->setCaption(title);
 	}
 
 	int MAGX_IconifyWindow(_THIS) 
 	{
+		DebugFunction();
+		
 		SDL_MainWin->suspend();
 		return true;
 	}
 
 	int MAGX_ToggleFullScreen(_THIS, int fullscreen)
 	{
+		DebugFunction();
+		
 		return -1;
 	}
 
 	SDL_GrabMode MAGX_GrabInput(_THIS, SDL_GrabMode mode) 
 	{
+		DebugFunction();
+		
 		return mode;
 	}
 
@@ -40,6 +54,8 @@ extern "C"
 	WMcursor *MAGX_CreateWMCursor(_THIS,
 			Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
 	{
+		DebugFunction();
+		
 		static WMcursor dummy;
 		dummy.bits = 0;
 		return &dummy;
@@ -47,15 +63,20 @@ extern "C"
 
 	int MAGX_ShowWMCursor(_THIS, WMcursor *cursor)
 	{
+		DebugFunction();
+		
 		return 1;
 	}
 
 	void MAGX_FreeWMCursor(_THIS, WMcursor *cursor)
 	{
+		DebugFunction();
 	}
 
 	void MAGX_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	{
+		DebugFunction();
+		
 		SDL_MainWin->setMousePos(QPoint(x, y));
 		SDL_PrivateMouseMotion(0, 0, x, y);
 	}
@@ -67,6 +88,8 @@ extern "C"
 
 	void MAGX_PumpEvents(_THIS)
 	{
+		DebugFunction();
+		
 		if( !qApp ) 
 			return; 
 		qApp->processEvents();	
@@ -95,6 +118,7 @@ extern "C"
 
 	void MAGX_InitOSKeymap(_THIS)
 	{
+		DebugFunction();
 	}
 
 }; /* Extern C */
