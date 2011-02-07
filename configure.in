@@ -1539,7 +1539,7 @@ AC_HELP_STRING([--enable-video-qtopia], [use Qtopia video driver [[default=no]]]
     fi
 }
 
-dnl Set up the MotoEzX video driver if enabled
+dnl Set up the MAGX video driver if enabled
 CheckMAGX()
 {
     AC_ARG_ENABLE(video-magx,
@@ -1604,6 +1604,40 @@ AC_HELP_STRING([--enable-video-motoezx], [use Moto/EzX video driver [[default=no
             SDL_LIBS="-lSDLmain $SDL_LIBS -Wl,--rpath,${QTDIR}/lib -Wl,--rpath,${EZXDIR}/lib"
 	    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L${QTDIR}/lib -ldl -lutil -lpthread -lezxappbase -lqte-mt"
             have_video=yes
+        fi
+        AC_LANG_C
+    fi
+}
+
+dnl Set up the MAGX audio driver if enabled
+CheckMAGXAudio()
+{
+    AC_ARG_ENABLE(audio-ezx,
+AC_HELP_STRING([--enable-audio-magx], [use Motorola/MAGX audio driver [[default=no]]]),
+                  , enable_audio_magx=no)
+    if test x$enable_audio = xyes -a x$enable_audio_magx = xyes; then
+        AC_MSG_CHECKING(for Motorola/MAGX audio support)
+        audio_motomagx=no
+        MOTOMAGX_FLAGS="-nostdinc -I${TOOLPREFIX}/include -I${TOOLPREFIX}/arm-linux-gnueabi/include -I${TOOLPREFIX}/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I${QTDIR}/include/ -DNO_DEBUG -fno-rtti -fno-exceptions"
+        AC_LANG_CPLUSPLUS
+        OLD_CXX="$CXXFLAGS"
+        CXXFLAGS="$MOTOMAGX_FLAGS"
+        AC_TRY_COMPILE([
+         #include <ZApplication.h>
+        ],[
+        ],[
+        audio_motomagx=yes
+        ])
+        CXXFLAGS="$OLD_CXX"
+        AC_MSG_RESULT($audio_motomagx)
+        if test x$audio_motomagx = xyes; then
+            AC_DEFINE(SDL_AUDIO_DRIVER_MAGX)
+            SOURCES="$SOURCES $srcdir/src/audio/magx/*.cc"
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $MOTOMAGX_FLAGS"
+            SDL_CFLAGS="$SDL_CFLAGS -DQWS -Dmain=SDL_main"
+            SDL_LIBS="-lSDLmain $SDL_LIBS"
+	    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L${QTDIR}/lib -lezxsound"
+            have_audio=yes
         fi
         AC_LANG_C
     fi
@@ -2438,6 +2472,7 @@ case "$host" in
         CheckQtopia
         CheckMAGX
         CheckMotoEzX
+        CheckMAGXAudio
 		CheckEZXAudio
         CheckPicoGUI
         CheckOpenGLX11

@@ -180,6 +180,9 @@ extern AudioBootStrap EPOCAudio_bootstrap;
 #if SDL_AUDIO_DRIVER_EZX
 extern AudioBootStrap EZXAudio_bootstrap;
 #endif
+#if SDL_AUDIO_DRIVER_MAGX
+extern AudioBootStrap MAGXAudio_bootstrap;
+#endif
 
 /* This is the current audio device */
 extern SDL_AudioDevice *current_audio;
