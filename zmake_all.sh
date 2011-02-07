@@ -12,7 +12,7 @@ rm libSDL-1.2.so.0
 }
 
 source ezxenv.sh
-export VER=B2
+export VER=C1
 
 $MOC src/video/magx/SDL_magx_win.h -o src/video/magx/moc_SDL_magx_win.cc
 
