@@ -19,11 +19,14 @@
     Sam Lantinga
     slouken@libsdl.org
 
+
+
+	Output audio via libezxsound.so for Motorola MAGX Phone
+
     This file written by Sergey Nizovtsev (snizovtsev@gmail.com)
+    Update by Prozorov Anton <prozanton@gmail.com> for out on magx
 */
 #include "SDL_config.h"
-
-/* Output audio via libezxsound.so for Motorola Z6... */
 
 #include "SDL_rwops.h"
 #include "SDL_timer.h"
@@ -132,7 +135,7 @@ static void EZXAudio_PlayAudio(_THIS)
 {
 	if ( !audio_dev || audio_dev->checkDevState()!=0 )//Simulate write to device, if dont open
 	{
-		SDL_Delay(2*mixlen);
+		SDL_Delay(3*mixlen);
 		return;
 	}
 	//if ( !audio_dev->canWrite() )

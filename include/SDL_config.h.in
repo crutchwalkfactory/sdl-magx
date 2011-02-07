@@ -184,6 +184,7 @@
 #undef SDL_AUDIO_DRIVER_SUNAUDIO
 #undef SDL_AUDIO_DRIVER_WAVEOUT
 #undef SDL_AUDIO_DRIVER_EZX
+#undef SDL_AUDIO_DRIVER_MAGX
 
 /* Enable various cdrom drivers */
 #undef SDL_CDROM_AIX

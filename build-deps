@@ -1153,7 +1153,7 @@ $(objects)/moc_SDL_magx_win.lo: ./src/video/magx/moc_SDL_magx_win.cc \
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/video/magx/moc_SDL_magx_win.cc  -o $@
 
 
-$(objects)/SDL_ezxaudio.lo: ./src/audio/ezx/SDL_ezxaudio.cc \
+$(objects)/SDL_magxaudio.lo: ./src/audio/magx/SDL_magxaudio.cc \
 	./include/SDL_audio.h \
 	./include/SDL_config.h \
 	./include/SDL_endian.h \
@@ -1170,10 +1170,10 @@ $(objects)/SDL_ezxaudio.lo: ./src/audio/ezx/SDL_ezxaudio.cc \
 	./src/audio/SDL_audiodev_c.h \
 	./src/audio/SDL_audiomem.h \
 	./src/audio/SDL_sysaudio.h \
-	./src/audio/ezx/SDL_ezxaudio.h \
-	./src/audio/ezx/ezxsound.h \
+	./src/audio/magx/AAL_audio.h \
+	./src/audio/magx/SDL_magxaudio.h \
 
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/audio/ezx/SDL_ezxaudio.cc  -o $@
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/audio/magx/SDL_magxaudio.cc  -o $@
 
 
 $(objects)/SDL_systhread.lo: ./src/thread/pthread/SDL_systhread.c \
