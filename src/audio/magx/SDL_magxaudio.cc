@@ -203,9 +203,9 @@ static void MAGXAudio_PlayAudio(_THIS)
 	if ( id==0 || AAL_in_call_capture(id) )
 		return;
 	
+	int i;
 	if ( frame_ticks )
 	{
-		int i;
 		for (i=1; i<buf_size/4; i++ )
 			if ( ((int*)aalBuf.buffer)[i]==0 && ((int*)aalBuf.buffer)[i-1]==0 && ((int*)aalBuf.buffer)[i-2]==0 )
 				break;

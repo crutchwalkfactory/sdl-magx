@@ -4,7 +4,7 @@ top_builddir = .
 srcdir  = .
 objects = build
 depend	= build-deps
-prefix = /arm-eabi
+prefix = $(TOOLPREFIX)
 exec_prefix = ${prefix}
 bindir	= ${exec_prefix}/bin
 libdir  = ${exec_prefix}/lib
@@ -22,9 +22,9 @@ SHELL	= /bin/bash
 CC      = arm-linux-gnu-gcc
 INCLUDE = -I./include
 CFLAGS  = -g -O3 
-EXTRA_CFLAGS = -I./include -D_GNU_SOURCE=1 -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -march=armv6j -mtune=arm1136jf-s -mfpu=vfp -nostdinc -I/arm-eabi/include -I/arm-eabi/arm-linux-gnueabi/include -I/arm-eabi/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I/arm-eabi/lib/qt-ve66/include -I/arm-eabi/lib/ezx-ve66/include -DNO_DEBUG -fno-rtti -fno-exceptions -D_REENTRANT -DHAVE_LINUX_VERSION_H
+EXTRA_CFLAGS = -I./include -D_GNU_SOURCE=1 -nostdinc -I$(TOOLPREFIX)/include -I$(TOOLPREFIX)/arm-linux-gnueabi/include -I$(TOOLPREFIX)/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I$(QTDIR)/include -I$(EZXDIR)/include -DNO_DEBUG -fno-rtti -fno-exceptions -march=armv6j -mtune=arm1136jf-s -mfpu=vfp -nostdinc -I$(TOOLPREFIX)/include -I$(TOOLPREFIX)/arm-linux-gnueabi/include -I$(TOOLPREFIX)/lib/gcc/arm-linux-gnueabi/3.4.3/include -DQWS -I$(QTDIR)/include -I$(EZXDIR)/include -DNO_DEBUG -fno-rtti -fno-exceptions -D_REENTRANT -DHAVE_LINUX_VERSION_H
 LDFLAGS = 
-EXTRA_LDFLAGS =  -lm -ldl -L/arm-eabi/lib/qt-ve66/lib -L/arm-eabi/lib/ezx-ve66/lib -ldl -lpthread -lezxappbase -lqte-mt -L/arm-eabi/lib/qt-ve66/lib -lezxsound -lpthread
+EXTRA_LDFLAGS =  -lm -ldl -L$(QTDIR)/lib -L$(EZXDIR)/lib -ldl -lpthread -lezxappbase -lqte-mt -L$(QTDIR)/lib -lezxsound -lpthread
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 INSTALL = /usr/bin/install -c
 NASM	=  
