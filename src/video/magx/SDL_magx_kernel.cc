@@ -369,9 +369,9 @@ int getAllDMAMem()
 	
 	pp_reqbufs_params pp_reqbufs;
 
-	bool bMemAllowed=false;
+	bool bMemAllowed;
 
-	for ( int i=10;i>0&&!bMemAllowed;i-- )
+	for ( int i=10;i>0;i-- )
 	{
 		pp_reqbufs.count = 1;
 		pp_reqbufs.req_size = i*512*1024;
@@ -394,7 +394,14 @@ int getAllDMAMem()
 		return 0;
 	}
 	
-	printf("MAGX_VO: IPU memory: %uM\n", pp_desc.size/(1024*1024));
+	printf("MAGX_VO: IPU memory: %.1lf M\n", (double)pp_desc.size/(1024*1024));
+	
+	if ( pp_desc.size==0 )
+	{
+		pp_reqbufs.count = 0;
+		ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs);
+		return 0;
+	}
 	
 	ipu_pool_initialize(pp_desc.addr, pp_desc.size, IPU_PAGE_ALIGN);
 	

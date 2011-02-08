@@ -424,7 +424,7 @@ extern "C"
 
 	void MAGX_VideoQuit(_THIS)
 	{
-		DebugFunction();
+		printf("MAGX: MAGX_VideoQuit\n");
 		
 		uninit();
 		
