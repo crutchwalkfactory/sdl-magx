@@ -424,7 +424,7 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 		case KEYCODE_SEND:
 			scancode = my_special ? SmyCALL : myCALL;
 			break;
-		//case KEYCODE_IMAGING:
+		case KEYCODE_IMAGING: //Key camera full pres
 		case 0x4021: //Key camera pre pres
 			scancode = my_special ? SmyCAMERA : myCAMERA;
 			break;
