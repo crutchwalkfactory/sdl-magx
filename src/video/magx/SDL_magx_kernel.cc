@@ -218,6 +218,23 @@ int setBppFB( uint32_t in_bpp )
 	return 1;
 }
 
+inline unsigned long int bppTopixfmt(int bpp, bool out)
+{
+	switch ( vo_dbpp )
+	{
+		case 16:
+			return IPU_PIX_FMT_RGB565;
+		case 32:
+			return IPU_PIX_FMT_BGR32;			
+		case 24:
+		default:
+			if ( out )
+				return IPU_PIX_FMT_BGRA6666;
+			else
+				return IPU_PIX_FMT_RGB24;						
+	}	
+}
+
 int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_rot )
 {
 	DebugFunction();
@@ -280,38 +297,13 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 	pp_init.in_width = vwidth;
 	pp_init.in_height = vheight;
 	pp_init.in_stride = vwidth;
-	switch ( in_dbpp )
-	{		
-		case 16:
-			pp_init.in_pixel_fmt = IPU_PIX_FMT_RGB565;
-			break;
-		case 32:
-			pp_init.in_pixel_fmt = IPU_PIX_FMT_BGR32;
-			break;		
-		case 24:
-		default:
-			pp_init.in_pixel_fmt = IPU_PIX_FMT_RGB24;
-			break;
-	}
-	
+	pp_init.in_pixel_fmt = bppTopixfmt(in_dbpp,0);
 	pp_init.out_width  = p_width;
 	pp_init.out_height = p_height;
 	pp_init.out_stride = p_width;
+	pp_init.out_pixel_fmt = bppTopixfmt(in_dbpp,1);
 	pp_init.mid_stride = p_height;
 	pp_init.rot = rot;
-	switch ( vo_dbpp )
-	{
-		case 16:
-			pp_init.out_pixel_fmt = IPU_PIX_FMT_RGB565;
-			break;	
-		case 32:
-			pp_init.out_pixel_fmt = IPU_PIX_FMT_BGR32;
-			break;				
-		case 24:
-		default:
-			pp_init.out_pixel_fmt = IPU_PIX_FMT_BGRA6666;
-			break;			
-	}
 
 	if (ioctl(fd_pp, PP_IOCTL_INIT, &pp_init) < 0) 
 	{
@@ -320,10 +312,9 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 	}
 	
 	memset(&pp_st, 0, sizeof(pp_st));
-	pp_st.wait = 0;
 	if ( pp_dma_count>1 )
 	{
-		pp_st.mid = pp_desc;
+		pp_st.mid.index = 0;
 		pp_st.mid.size = IPU_MEM_ALIGN(p_width*p_height*vo_pixel_size);
 		pp_st.mid.addr = ipu_malloc( pp_st.mid.size );
 	}
@@ -333,8 +324,8 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 		pp_st.out.size = IPU_MEM_ALIGN(p_width*p_height*vo_pixel_size);
 		pp_st.out.addr = fb_finfo.smem_start;	
 		
-		pp_st.in.size = IPU_MEM_ALIGN(vwidth*vheight*in_pixel_size);
 		pp_st.in.index = -1;
+		pp_st.in.size = IPU_MEM_ALIGN(vwidth*vheight*in_pixel_size);
 		//Try locate input buffer in video memory
 		if ( pp_st.in.size <= fb_finfo.smem_len-pp_st.out.size )
 		{
@@ -349,6 +340,12 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 			pp_dma_buffer = (char*)mmap (NULL, pp_st.in.size, 
 							PROT_READ | PROT_WRITE, MAP_SHARED, 
 								fd_pp, pp_st.in.addr);			
+		}
+
+		if ( pp_st.in.addr==NULL )
+		{
+			printf("MAGX_VO: Not enough memory to alloce the input buffer!\n");
+			return 0;
 		}
 
 		vo_init|=VO_ALLOC_IPU_BUF;
@@ -371,10 +368,10 @@ int getAllDMAMem()
 
 	bool bMemAllowed;
 
-	for ( int i=10;i>0;i-- )
+	for ( int i=20;i>0;i-- )
 	{
 		pp_reqbufs.count = 1;
-		pp_reqbufs.req_size = i*512*1024;
+		pp_reqbufs.req_size = i*256*1024;
 	
 		//Try alloc memory
 		bMemAllowed = (ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs)==0);
@@ -467,9 +464,9 @@ void uninit()
 		if ( pp_frame_buffer )
 			memset(pp_frame_buffer, 0, p_width*p_height*hw_pixel_size);
 		munmap(pp_frame_buffer, p_width*p_height*hw_pixel_size);
-
-		close(fb_dev_fd);
 	}
+	if (fb_dev_fd)
+		close(fb_dev_fd);
 	preinit();
 	
 	printf("MAGX_VO: All uninit\n");
