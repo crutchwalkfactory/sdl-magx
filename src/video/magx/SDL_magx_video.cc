@@ -283,7 +283,7 @@ extern "C"
 				initDoubleBuffer();
 		}
 
-		current->flags = SDL_FULLSCREEN | (flags&SDL_DOUBLEBUF);
+		current->flags = SDL_FULLSCREEN | SDL_PREALLOC | (flags&SDL_DOUBLEBUF);
 		current->w = width;
 		current->h = height;
 		current->pitch = SDL_CalculatePitch(current);
@@ -362,7 +362,7 @@ extern "C"
 		
 		printf("MAGX: Allocated %u bytes at %u\n", size, addr);
 		
-		surface->flags |= SDL_HWSURFACE;
+		surface->flags |= SDL_HWSURFACE | SDL_PREALLOC;
 		surface->pixels = (char*)mmap (NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd_pp, addr);
 		if (surface->pixels == MAP_FAILED) 
 		{
