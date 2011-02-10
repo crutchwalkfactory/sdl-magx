@@ -78,7 +78,7 @@ extern "C"
 		{
 			SDL_memset(device, 0, (sizeof *device));
 			device->hidden = (struct SDL_PrivateVideoData *)
-			SDL_malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 		}
 		if ( (device == NULL) || (device->hidden == NULL) ) 
 		{
@@ -148,7 +148,7 @@ extern "C"
 		SDL_MainWin = new SDL_MainWindow();
 		qApp->setMainWidget(SDL_MainWin);
 		SDL_MainWin->show();
-		
+
 		//Init graphic out
 		preinit();
 		if ( !initFB() )
@@ -323,19 +323,11 @@ extern "C"
 	{
 		DebugFunction();
 		
-		QPoint point(-1, -1);
-		if ( SDL_MainWin->isActiveWindow() ) 
-			point = SDL_MainWin->mousePos();
-
-		if ( (point.x() >= 0) && (point.x() < SDL_VideoSurface->w) &&
-			(point.y() >= 0) && (point.y() < SDL_VideoSurface->h) ) 
-		{
-			SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-			SDL_PrivateMouseMotion(0, 0, (Sint16)point.x(), (Sint16)point.y());
-		} else 
-		{
-			SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
-		}
+		int x, y;
+		getMousPos( x, y );
+		
+		SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+		SDL_PrivateMouseMotion(0, 0, (Sint16)x, (Sint16)y);
 	}
 
 	// We don't actually allow hardware surfaces other than the main one
@@ -400,6 +392,7 @@ extern "C"
 	static int MAGX_FlipHWSurface(_THIS, SDL_Surface *surface)
 	{
 		DebugFunction();
+		
 		if ( SkipedFirstFlip )
 			flipPage();
 		else
@@ -419,6 +412,7 @@ extern "C"
 	int MAGX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	{
 		DebugFunction();
+		
 		return -1;
 	}
 
@@ -429,8 +423,9 @@ extern "C"
 		uninit();
 		
 		_this->screen->pixels = NULL;
+		
 		delete SDL_MainWin;
-		SDL_MainWin = 0;
+		SDL_MainWin = NULL;
 	}
 
 }; /* Extern C */

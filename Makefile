@@ -168,16 +168,3 @@ dist $(distfile):
 	if test -f $(distdir)/test/Makefile; then (cd $(distdir)/test && make distclean); fi
 	tar cvf - $(distdir) | gzip --best >$(distfile)
 	rm -rf $(distdir)
-
-rpm: $(distfile)
-	rpmbuild -ta $?
-
-# Create a SVN snapshot that people can run update on
-snapshot:
-	svn co http://svn.libsdl.org/branches/SDL-1.2
-	(cd SDL-1.2 && ./autogen.sh && rm -rf autom4te.cache)
-	cp SDL-1.2/include/SDL_config.h.default SDL-1.2/include/SDL_config.h
-	tar zcf $(HOME)/SDL-1.2.tar.gz SDL-1.2
-	rm -f $(HOME)/SDL-1.2.zip
-	zip -r $(HOME)/SDL-1.2.zip SDL-1.2
-	rm -rf SDL-1.2

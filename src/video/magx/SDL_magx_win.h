@@ -26,9 +26,6 @@ public:
 	void resume();
 	void suspend( int n=1 );
 
-	const QPoint& mousePos() const { return my_mouse_pos; }
-	void setMousePos(const QPoint& newpos);
-
 	void setRotation(screenRotationT r) { rot=r; }
 
  public slots:
@@ -62,11 +59,10 @@ private:
 	};
 	void QueueKey(QKeyEvent *e, int pressed);
 
-	QPoint my_mouse_pos;
-	bool my_special;
+	bool bMySpecial;
 	QCopChannel *inCallChannel,*ounCallChannel;
-	SDL_keysym last;
-	bool last_mod;
+	SDL_keysym keyLast;
+	bool bLastMod;
 	
 	screenRotationT rot;
 };

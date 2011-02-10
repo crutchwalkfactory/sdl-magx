@@ -49,7 +49,7 @@ static int in_width = 0;
 #define vo_dbpp (fb_vinfo.bits_per_pixel)
 #define vo_pixel_size bppToPixelSize(vo_dbpp)
 
-//IPU (PreProcessor)
+//IPU (Post-Processor)
 static pp_start_params pp_st;
 static char * pp_dma_buffer = NULL;
 static unsigned int pp_dma_buffer_addr = 0;
@@ -63,6 +63,10 @@ static char * pp_frame_buffer = NULL;
 int fb_dev_fd;
 int fd_pp;
 
+//Mouse
+int cursor_x;
+int cursor_y;
+bool bShowCursor;
 
 //Init flag
 int vo_init=0;
@@ -114,6 +118,9 @@ void preinit()
 	pp_dma_buffer=0;
 	memset(&pp_desc, 0, sizeof(pp_desc));
 	memset(&pp_init, 0, sizeof(pp_init));
+	cursor_x=0;
+	cursor_y=0;
+	bShowCursor=false;
 }
 
 //Open and preinicialization FB
@@ -367,7 +374,8 @@ int getAllDMAMem()
 	pp_reqbufs_params pp_reqbufs;
 
 	bool bMemAllowed;
-
+	
+	//Detect size IPU memory
 	for ( int i=20;i>0;i-- )
 	{
 		pp_reqbufs.count = 1;
@@ -384,6 +392,7 @@ int getAllDMAMem()
 		ioctl(fd_pp, PP_IOCTL_REQBUFS, &pp_reqbufs);		
 	}
 	
+	//Get buffer
 	pp_desc.index = 0;
 	if (ioctl(fd_pp, PP_IOCTL_QUERYBUF, &pp_desc) != 0) 
 	{
@@ -400,6 +409,7 @@ int getAllDMAMem()
 		return 0;
 	}
 	
+	//Initialize pool for dinamic alloc IPU memory
 	ipu_pool_initialize(pp_desc.addr, pp_desc.size, IPU_PAGE_ALIGN);
 	
 	vo_init|=VO_ALLOC_DMA_MEM;
@@ -472,15 +482,64 @@ void uninit()
 	printf("MAGX_VO: All uninit\n");
 }
 
+#include "SDL_magx_cur.c"
+
+void setMousPos( int x, int y )
+{
+	cursor_x = x;
+	cursor_y = y;
+}
+
+void getMousPos( int &x, int &y )
+{
+	x = cursor_x;
+	y = cursor_y;	
+}
+
+void setShowCursor( bool show )
+{
+	bShowCursor = show;
+}
+
+void drawMouse( char *dsc )
+{
+	if ( !bShowCursor )
+		return;
+	
+	int w;
+
+	w = in_width*2;
+	dsc += cursor_x*2 + cursor_y*w;
+	
+	int cw=7, ch=12;
+	if ( cw+cursor_x>=in_width ) cw=in_width-cursor_x;
+	if ( ch+cursor_y>=in_height ) ch=in_height-cursor_y;
+	if ( !cw || !ch ) return;
+	
+	char *src = (char *)sdlCursor;
+	
+	int i, j;
+	for ( i=0; i<ch; i++ )
+	{
+		for ( j=0; j<cw*2; j+=2 )
+		{
+			if ( *((unsigned short int*)(src+j))!=0 )
+				memcpy((dsc+j), (src+j), 2);
+		}
+		dsc += w;
+		src += 16;
+	}
+}
+
 void flipBuffer()
 {
 	DebugFunction();
 	
 	if ( pp_dma_buffer )
 	{
+		//line by line copy image
 		char *src, *dst;
 		int w, h;
-		int srcskip, dstskip;
 
 		w = p_width*vo_pixel_size;
 		h = p_height;
@@ -488,13 +547,19 @@ void flipBuffer()
 		dst = pp_frame_buffer;
 
 		while ( h-- ) 
-			memcpy(dst, src, p_width);
+		{
+			memcpy(dst, src, w);
+			dst += w;
+			src += w;
+		}
 	}
 }
 
 void flipPage()
 {
 	DebugFunction();
+	
+	drawMouse(pp_dma_buffer);
 	
 	if ( pp_st.in.index != -1 )
 	{
