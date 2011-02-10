@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "SDL_magx_win.h"
+#include "SDL_magx_kernel.h"
 
 #if 0
 #define DebugFunction() printf("MAGX_VO: sys - %s()\n",__FUNCTION__) 
@@ -43,7 +44,7 @@ extern "C"
 	{
 		DebugFunction();
 		
-		return mode;
+		return SDL_GRAB_ON;
 	}
 
 	struct WMcursor 
@@ -65,19 +66,23 @@ extern "C"
 	{
 		DebugFunction();
 		
+		setShowCursor(true);
+		
 		return 1;
 	}
 
 	void MAGX_FreeWMCursor(_THIS, WMcursor *cursor)
 	{
 		DebugFunction();
+		
+		setShowCursor(false);
 	}
 
 	void MAGX_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	{
 		DebugFunction();
 		
-		SDL_MainWin->setMousePos(QPoint(x, y));
+		setMousPos(x, y);
 		SDL_PrivateMouseMotion(0, 0, x, y);
 	}
 

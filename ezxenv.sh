@@ -16,7 +16,7 @@ export EZXDIR=/arm-eabi/lib/ezx-ve66
 export PATH=$TOOLPREFIX/bin:$TOOLPREFIX/arm-linux-gnueabi/bin:$PATH
 
 export ARCH=iwmmxt 
-export CC=arm-linux-gnu-gcc 
+export CC=arm-linux-gnu-gcc
 export CXX=arm-linux-gnu-g++ 
 export LD=arm-linux-gnu-ld 
 export AR=arm-linux-gnu-ar 

@@ -6,6 +6,9 @@
 #include <qtimer.h>
 
 #include "SDL_magx_kernel.h"
+#ifdef MPH_MODE_INT_PHONE
+#include "morphing_mode.h"
+#endif
 
 #if 0
 #define DebugFunction() printf("MAGX_VO: win - %s()\n",__FUNCTION__) 
@@ -16,12 +19,6 @@
 extern "C" {
 #include "../../events/SDL_events_c.h"
 };
-
-/* Name of the environment variable used to invert the screen rotation or not:
-Possible values:
-!=0 : Screen is 270° rotated
-0: Screen is 90° rotated*/
-#define SDL_QT_ROTATION_ENV_NAME "SDL_QT_INVERT_ROTATION"
 
 screenRotationT screenRotation = SDL_QT_NO_ROTATION;
 
@@ -60,7 +57,7 @@ void CargarTeclas()
 	
 	//Get default rotation
 	int envValue;
-	char * envString = SDL_getenv(SDL_QT_ROTATION_ENV_NAME);
+	char * envString = SDL_getenv("SDL_QT_INVERT_ROTATION");
 	if ( envString )
 		envValue = atoi(envString);
 	else
@@ -182,7 +179,7 @@ void CargarTeclas()
 
 SDL_MainWindow::SDL_MainWindow()
     :ZKbMainWidget ( ZHeader::MAINDISPLAY_HEADER, 0, "SDL_MainWidget", 0),
-    my_mouse_pos(0, 0), my_special(false), last_mod(false), rot(SDL_QT_NO_ROTATION)
+    bMySpecial(false), bLastMod(false), rot(SDL_QT_NO_ROTATION)
 {
 	DebugFunction();
 	
@@ -195,7 +192,7 @@ SDL_MainWindow::SDL_MainWindow()
 
 	CargarTeclas();
 	
-	last.scancode = 0;
+	keyLast.scancode = 0;
   	
   	disconnect( qApp, SIGNAL(askReturnToIdle(int)), qApp, SLOT(slotReturnToIdle(int)) );
   	
@@ -212,14 +209,12 @@ SDL_MainWindow::SDL_MainWindow()
 	setFocus();
 	
 	#ifdef MPH_MODE_INT_PHONE
-	int keypadmod = MPH_MODE_INT_PHONE;
+	int keypadmod = MORPHING_MODE_PHONE;
 	char * envString = SDL_getenv("SDL_QT_KEYPADMODE");
 	if ( envString )
 		keypadmod = atoi(envString);	  
 	setMorphMode(keypadmod);
 	#endif
-	
-	qApp->installEventFilter( this );
 }
 
 SDL_MainWindow::~SDL_MainWindow() 
@@ -309,36 +304,24 @@ void SDL_MainWindow::closeEvent(QCloseEvent *e)
 	e->ignore();
 }
 
-void SDL_MainWindow::setMousePos(const QPoint &pos) 
-{
-	DebugFunction();
-	
-	if (rot == SDL_QT_NO_ROTATION)
-		my_mouse_pos = pos;		
-	else if (rot == SDL_QT_ROTATION_270)
-		my_mouse_pos = QPoint(height()-pos.y(), pos.x());
-	else if (rot == SDL_QT_ROTATION_90)
-		my_mouse_pos = QPoint(pos.y(), width()-pos.x());
-}
-
 inline int SDL_MainWindow::keyUp()
 {
-	return my_special ? SmyUP : myUP;
+	return bMySpecial ? SmyUP : myUP;
 }
 
 inline int SDL_MainWindow::keyDown()
 {
-	return my_special ? SmyDOWN : myDOWN;
+	return bMySpecial ? SmyDOWN : myDOWN;
 }
 
 inline int SDL_MainWindow::keyLeft()
 {
-	return my_special ? SmyLEFT : myLEFT;
+	return bMySpecial ? SmyLEFT : myLEFT;
 }
 
 inline int SDL_MainWindow::keyRight()
 {
-	return my_special ? SmyRIGHT : myRIGHT;
+	return bMySpecial ? SmyRIGHT : myRIGHT;
 }
 
 bool SDL_MainWindow::eventFilter(QObject* o, QEvent* pEvent)
@@ -370,21 +353,21 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 	SDL_keysym keysym;
 	int scancode = e->key();
 
-	if(last.scancode)
+	if(keyLast.scancode)
 	{
 		// we press/release mod-key without releasing another key
-		if(last_mod != my_special)
-			SDL_PrivateKeyboard(SDL_RELEASED, &last);
+		if(bLastMod != bMySpecial)
+			SDL_PrivateKeyboard(SDL_RELEASED, &keyLast);
 	}
 
 	/* Set the keysym information */
 	switch(scancode) 
 	{
 		case KEYCODE_END:
-			scancode = my_special ? SmyRED : myRED;
+			scancode = bMySpecial ? SmyRED : myRED;
 			break;
 		case KEYCODE_CENTER_SELECT:
-			scancode = my_special ? SmyCENTER : myCENTER;
+			scancode = bMySpecial ? SmyCENTER : myCENTER;
 			break;
 		case KEYCODE_LEFT:
 			if (rot == SDL_QT_ROTATION_270) scancode = keyUp();
@@ -407,68 +390,68 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 			else scancode = keyDown();
 			break;
 		case KEYCODE_SIDE_SELECT:
-			scancode =  my_special ? SmySIDE : mySIDE;
+			scancode =  bMySpecial ? SmySIDE : mySIDE;
 			break;
 		case KEYCODE_CARRIER:
-			scancode =  my_special ? SmyMUSIC : myMUSIC;
+			scancode =  bMySpecial ? SmyMUSIC : myMUSIC;
 			break;
 		case KEYCODE_CLEAR:
-			scancode = my_special ? SmyC : myC;
+			scancode = bMySpecial ? SmyC : myC;
 			break;
 		case KEYCODE_LSK:
-			scancode = my_special ? SmyLSOFT : myLSOFT;
+			scancode = bMySpecial ? SmyLSOFT : myLSOFT;
 			break;
 		case KEYCODE_RSK:
-			scancode = my_special ? SmyRSOFT : myRSOFT;
+			scancode = bMySpecial ? SmyRSOFT : myRSOFT;
 			break;
 		case KEYCODE_SEND:
-			scancode = my_special ? SmyCALL : myCALL;
+			scancode = bMySpecial ? SmyCALL : myCALL;
 			break;
 		case KEYCODE_IMAGING: //Key camera full pres
 		case 0x4021: //Key camera pre pres
-			scancode = my_special ? SmyCAMERA : myCAMERA;
+			scancode = bMySpecial ? SmyCAMERA : myCAMERA;
 			break;
 		case KEYCODE_SIDE_UP:
-			scancode = my_special ? SmyVOLUP : myVOLUP; 
+			scancode = bMySpecial ? SmyVOLUP : myVOLUP; 
 			break;
 		case KEYCODE_SIDE_DOWN:
-			scancode = my_special ? SmyVOLDOWN : myVOLDOWN;
+			scancode = bMySpecial ? SmyVOLDOWN : myVOLDOWN;
 			break;
 		case KEYCODE_0:
-			scancode = my_special ? Smy0 : my0;
+			scancode = bMySpecial ? Smy0 : my0;
 			break;
 		case KEYCODE_1:
-			scancode = my_special ? Smy1 : my1;
+			scancode = bMySpecial ? Smy1 : my1;
 			break;
 		case KEYCODE_2:
-			scancode = my_special ? Smy2 : my2;
+			scancode = bMySpecial ? Smy2 : my2;
 			break;
 		case KEYCODE_3:
-			scancode = my_special ? Smy3 : my3;
+			scancode = bMySpecial ? Smy3 : my3;
 			break;
 		case KEYCODE_4:
-			scancode = my_special ? Smy4 : my4;
+			scancode = bMySpecial ? Smy4 : my4;
 			break;
 		case KEYCODE_5:
-			scancode = my_special ? Smy5 : my5;
+			scancode = bMySpecial ? Smy5 : my5;
 			break;
 		case KEYCODE_6:
-			scancode = my_special ? Smy6 : my6;
+			scancode = bMySpecial ? Smy6 : my6;
 			break;
 		case KEYCODE_7: 
-			scancode = my_special ? Smy7 : my7;
+			scancode = bMySpecial ? Smy7 : my7;
 			break;
 		case KEYCODE_8:
-			scancode = my_special ? Smy8 : my8;
+			scancode = bMySpecial ? Smy8 : my8;
 			break;
 		case KEYCODE_9:
-			scancode = my_special ? Smy9 : my9;
+			scancode = bMySpecial ? Smy9 : my9;
 			break;
 		case KEYCODE_STAR:
-			scancode = my_special ? SmyASTERISK : myASTERISK;
+			scancode = bMySpecial ? SmyASTERISK : myASTERISK;
 			break;
 		case KEYCODE_POUND:
-			scancode = my_special ? SmyNUMERAL : myNUMERAL;
+			scancode = bMySpecial ? SmyNUMERAL : myNUMERAL;
 			break;
 
 		#ifdef OMEGA_SUPPORT
@@ -501,16 +484,16 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 			scancode = SDLK_UNKNOWN;
 			break;
 	}
-  
+
 	if ( scancode == 1234 ) suspend();
 
 	if ( scancode == 9999 ) 
 	{ 
-		if (my_special == false) 
+		if (bMySpecial == false) 
 		{ 
-			if(pressed) my_special = true; else my_special = false;
+			if(pressed) bMySpecial = true; else bMySpecial = false;
 			} else{
-			if(pressed) my_special = false; else my_special = true;
+			if(pressed) bMySpecial = false; else bMySpecial = true;
 		}
 		scancode = SDLK_UNKNOWN;       
 	} 
@@ -527,15 +510,15 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 		keysym.unicode = 0;
 	}
 
-	last = keysym;
-	last_mod = my_special;
+	keyLast = keysym;
+	bLastMod = bMySpecial;
 
 	/* Queue the key event */
 	if ( pressed )
 		SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
 	else 
 	{
-		last.scancode = 0;
+		keyLast.scancode = 0;
 		SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
 	}
 }
@@ -551,14 +534,14 @@ void SDL_MainWindow::omgScroll(QKeyEvent *e)
 	{
 		step = (step>0)?1:-1;
 		if (rot == SDL_QT_ROTATION_270) 
-			my_mouse_pos.setX(my_mouse_pos.x()-step*10);
+			qpMyMousePos.setX(qpMyMousePos.x()-step*10);
 		if (rot == SDL_QT_ROTATION_90)
-			my_mouse_pos.setX(my_mouse_pos.x()+step*10);	
+			qpMyMousePos.setX(qpMyMousePos.x()+step*10);	
 		
-		if (my_mouse_pos.x()<0) my_mouse_pos.setX(0);
-		if (my_mouse_pos.x()>in_width) my_mouse_pos.setX(in_width);
+		if (qpMyMousePos.x()<0) qpMyMousePos.setX(0);
+		if (qpMyMousePos.x()>in_width) qpMyMousePos.setX(in_width);
 			
-		SDL_PrivateMouseMotion(0, 0, my_mouse_pos.x(), my_mouse_pos.y());
+		SDL_PrivateMouseMotion(0, 0, qpMyMousePos.x(), qpMyMousePos.y());
 	}
 	
 	QApplication::setOmegaWheelScrollLines(-step);//e->step() - 

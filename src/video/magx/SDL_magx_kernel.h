@@ -33,7 +33,7 @@ extern int in_dbpp;
 
 #define uIPUMemSize (pp_desc.size)
 
-//Control
+//Control - Graphics
 
 ///Setup all the flags and handler of critical situations
 extern void preinit();
@@ -66,5 +66,10 @@ extern bool initDoubleBuffer();
 extern void setOriginalBPP(bool org);
 ///Returns a pointer to the input buffer
 extern char * pixels();
+
+//Control - Mouse
+void setMousPos( int x, int y );
+void getMousPos( int &x, int &y );
+void setShowCursor( bool show );
 
 #endif
