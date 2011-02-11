@@ -10,7 +10,7 @@
 #include "morphing_mode.h"
 #endif
 
-#if 1
+#if 0
 #define DebugFunction() printf("MAGX_VO: win - %s()\n",__FUNCTION__) 
 #else
 #define DebugFunction()
@@ -598,18 +598,7 @@ void SDL_MainWindow::omgScroll(QKeyEvent *e)
 	int step = e->step();
 	//if ( (bOmgParse==2) && (step != 0) )
 	if (step != 0)
-	{
-		step = (step>0)?1:-1;
-		if (rot == SDL_QT_ROTATION_270) 
-			qpMyMousePos.setX(qpMyMousePos.x()-step*10);
-		if (rot == SDL_QT_ROTATION_90)
-			qpMyMousePos.setX(qpMyMousePos.x()+step*10);	
-		
-		if (qpMyMousePos.x()<0) qpMyMousePos.setX(0);
-		if (qpMyMousePos.x()>in_width) qpMyMousePos.setX(in_width);
-			
-		SDL_PrivateMouseMotion(0, 0, qpMyMousePos.x(), qpMyMousePos.y());
-	}
+		MouseAction((step>0)?1:-1, 0);
 	
 	QApplication::setOmegaWheelScrollLines(-step);//e->step() - 
 }
