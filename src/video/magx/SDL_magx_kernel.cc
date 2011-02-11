@@ -42,8 +42,8 @@
 
 //In info
 #define in_pixel_size bppToPixelSize(in_dbpp)
-static int in_height = 0;
-static int in_width = 0;
+int in_height;
+int in_width;
 
 //Out info
 #define vo_dbpp (fb_vinfo.bits_per_pixel)
@@ -66,7 +66,7 @@ int fd_pp;
 //Mouse
 int cursor_x;
 int cursor_y;
-bool bShowCursor;
+bool bShowCursor, bCanUseCursor;
 
 //Init flag
 int vo_init=0;
@@ -118,9 +118,12 @@ void preinit()
 	pp_dma_buffer=0;
 	memset(&pp_desc, 0, sizeof(pp_desc));
 	memset(&pp_init, 0, sizeof(pp_init));
+	in_height = 0;
+	in_width = 0;
 	cursor_x=0;
 	cursor_y=0;
 	bShowCursor=false;
+	bCanUseCursor=false;
 }
 
 //Open and preinicialization FB
@@ -484,6 +487,11 @@ void uninit()
 
 #include "SDL_magx_cur.c"
 
+void setCanUseCursor( bool use )
+{
+	bCanUseCursor = use;
+}
+
 void setMousPos( int x, int y )
 {
 	cursor_x = x;
@@ -498,7 +506,8 @@ void getMousPos( int &x, int &y )
 
 void setShowCursor( bool show )
 {
-	bShowCursor = show;
+	if ( bCanUseCursor )
+		bShowCursor = show;
 }
 
 void drawMouse( char *dsc )
@@ -616,7 +625,7 @@ bool initDoubleBuffer()
 	}
 	memset(pp_dma_buffer, 0, size);
 	
-	printf("MAGX_VO: alloced IPU buffer\n");
+	printf("MAGX_VO: alloced Double Buffer\n");
 	
 	vo_init|=VO_INIT_DB;
 	return 1;
@@ -633,7 +642,7 @@ void setOriginalBPP(bool org)
 	} else
 	{
 		if ( vo_dbpp != in_dbpp )
-			setBppFB( in_dbpp );		
+			setBppFB( in_dbpp );	
 	}
 }
 
