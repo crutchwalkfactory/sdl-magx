@@ -12,7 +12,7 @@ rm libSDL-1.2.so.0
 }
 
 source ezxenv.sh
-export VER=C1
+export VER=C2
 
 makefrom=$1
 
