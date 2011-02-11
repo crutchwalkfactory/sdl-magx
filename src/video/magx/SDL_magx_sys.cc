@@ -6,7 +6,7 @@
 #include "SDL_magx_win.h"
 #include "SDL_magx_kernel.h"
 
-#if 0
+#if 1
 #define DebugFunction() printf("MAGX_VO: sys - %s()\n",__FUNCTION__) 
 #else
 #define DebugFunction()

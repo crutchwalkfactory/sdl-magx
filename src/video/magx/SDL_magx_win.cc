@@ -10,7 +10,7 @@
 #include "morphing_mode.h"
 #endif
 
-#if 0
+#if 1
 #define DebugFunction() printf("MAGX_VO: win - %s()\n",__FUNCTION__) 
 #else
 #define DebugFunction()
@@ -32,8 +32,6 @@ void SDL_HideSplash(){};
 //For suspend on call
 extern int UTIL_GetIncomingCallStatus();
 extern int UTIL_GetSideKeyLock();
-//For load keymap
-extern void CargarTeclas();
 //Syspend and focus flag
 int my_suspended;
 int my_focus;
@@ -51,7 +49,7 @@ static inline bool needSuspend()
 int myRED, myCENTER, myUP, myDOWN, myLEFT, myRIGHT, mySIDE, myMUSIC, myC, myLSOFT, myRSOFT, myCALL, myCAMERA, myVOLUP, myVOLDOWN, my0, my1, my2, my3, my4, my5, my6, my7, my8, my9, myASTERISK, myNUMERAL;
 int SmyRED, SmyCENTER, SmyUP, SmyDOWN, SmyLEFT, SmyRIGHT, SmySIDE, SmyMUSIC, SmyC, SmyLSOFT, SmyRSOFT, SmyCALL, SmyCAMERA, SmyVOLUP, SmyVOLDOWN, Smy0, Smy1, Smy2, Smy3, Smy4, Smy5, Smy6, Smy7, Smy8, Smy9, SmyASTERISK, SmyNUMERAL;
 
-void CargarTeclas()
+void SDL_MainWindow::CargarTeclas()
 {
 	ZConfig mySDL(QString(qApp->argv()[0])+"_SDL.cfg", false);
 	
@@ -61,8 +59,15 @@ void CargarTeclas()
 	if ( envString )
 		envValue = atoi(envString);
 	else
-		envValue = mySDL.readNumEntry("SYSTEM", "Rotation", 1);		  
+		envValue = mySDL.readNumEntry("SYSTEM", "Rotation", 1);
 	screenRotation = envValue ? SDL_QT_ROTATION_90 : SDL_QT_ROTATION_270;
+	bool bUseCursor = mySDL.readBoolEntry("MOUSE", "UseCursor", 0);
+	if ( bUseCursor )
+	{
+		setCanUseCursor( bUseCursor );
+		bControlCursor = mySDL.readBoolEntry("MOUSE", "ControlCursor", 0);
+		iCursorStep = mySDL.readNumEntry("MOUSE", "CursorStep", 12);
+	}
 	
 	ZConfig keyCFG("/usr/mlib/SDL/keyconfig.cfg", false);
 	QString val;
@@ -179,7 +184,8 @@ void CargarTeclas()
 
 SDL_MainWindow::SDL_MainWindow()
     :ZKbMainWidget ( ZHeader::MAINDISPLAY_HEADER, 0, "SDL_MainWidget", 0),
-    bMySpecial(false), bLastMod(false), rot(SDL_QT_NO_ROTATION)
+    bMySpecial(false), bLastMod(false), rot(SDL_QT_NO_ROTATION),
+    bControlCursor(false), iCursorStep(5), iMouseKeyState(false)
 {
 	DebugFunction();
 	
@@ -215,6 +221,8 @@ SDL_MainWindow::SDL_MainWindow()
 		keypadmod = atoi(envString);	  
 	setMorphMode(keypadmod);
 	#endif
+	
+	qApp->installEventFilter( this );
 }
 
 SDL_MainWindow::~SDL_MainWindow() 
@@ -304,23 +312,47 @@ void SDL_MainWindow::closeEvent(QCloseEvent *e)
 	e->ignore();
 }
 
-inline int SDL_MainWindow::keyUp()
+inline int SDL_MainWindow::keyUp(int pressed)
 {
+	if ( bControlCursor )
+	{
+		if ( pressed )
+			MouseAction(0,-1);
+		return SDLK_UNKNOWN;
+	}
 	return bMySpecial ? SmyUP : myUP;
 }
 
-inline int SDL_MainWindow::keyDown()
+inline int SDL_MainWindow::keyDown(int pressed)
 {
+	if ( bControlCursor )
+	{
+		if ( pressed )
+			MouseAction(0,1);
+		return SDLK_UNKNOWN;
+	}
 	return bMySpecial ? SmyDOWN : myDOWN;
 }
 
-inline int SDL_MainWindow::keyLeft()
+inline int SDL_MainWindow::keyLeft(int pressed)
 {
+	if ( bControlCursor )
+	{
+		if ( pressed )
+			MouseAction(-1,0);
+		return SDLK_UNKNOWN;
+	}
 	return bMySpecial ? SmyLEFT : myLEFT;
 }
 
-inline int SDL_MainWindow::keyRight()
+inline int SDL_MainWindow::keyRight(int pressed)
 {
+	if ( bControlCursor )
+	{
+		if ( pressed )
+			MouseAction(1,0);
+		return SDLK_UNKNOWN;
+	}
 	return bMySpecial ? SmyRIGHT : myRIGHT;
 }
 
@@ -367,27 +399,42 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 			scancode = bMySpecial ? SmyRED : myRED;
 			break;
 		case KEYCODE_CENTER_SELECT:
-			scancode = bMySpecial ? SmyCENTER : myCENTER;
+			if ( bControlCursor )
+			{
+				int x, y;
+				getMousPos(x, y);				
+				if ( pressed )
+				{
+					iMouseKeyState=SDL_BUTTON_LMASK;
+					SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_LMASK, x, y);
+				} else 
+				{
+					iMouseKeyState=0;
+					SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_LMASK, x, y);
+				}
+				scancode = SDLK_UNKNOWN;
+			} else
+				scancode = bMySpecial ? SmyCENTER : myCENTER;
 			break;
 		case KEYCODE_LEFT:
-			if (rot == SDL_QT_ROTATION_270) scancode = keyUp();
-			else if (rot == SDL_QT_ROTATION_90) scancode = keyDown();
-			else scancode = keyLeft();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyUp(pressed);
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyDown(pressed);
+			else scancode = keyLeft(pressed);
 			break;
 		case KEYCODE_UP:
-			if (rot == SDL_QT_ROTATION_270) scancode = keyRight();
-			else if (rot == SDL_QT_ROTATION_90) scancode = keyLeft();
-			else scancode = keyUp();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyRight(pressed);
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyLeft(pressed);
+			else scancode = keyUp(pressed);
 			break;
 		case KEYCODE_RIGHT:
-			if (rot == SDL_QT_ROTATION_270) scancode = keyDown();
-			else if (rot == SDL_QT_ROTATION_90) scancode = keyUp();
-			else scancode = keyRight();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyDown(pressed);
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyUp(pressed);
+			else scancode = keyRight(pressed);
 			break;
 		case KEYCODE_DOWN:
-			if (rot == SDL_QT_ROTATION_270) scancode = keyLeft();
-			else if (rot == SDL_QT_ROTATION_90) scancode = keyRight();
-			else scancode = keyDown();
+			if (rot == SDL_QT_ROTATION_270) scancode = keyLeft(pressed);
+			else if (rot == SDL_QT_ROTATION_90) scancode = keyRight(pressed);
+			else scancode = keyDown(pressed);
 			break;
 		case KEYCODE_SIDE_SELECT:
 			scancode =  bMySpecial ? SmySIDE : mySIDE;
@@ -521,6 +568,26 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 		keyLast.scancode = 0;
 		SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
 	}
+}
+
+void SDL_MainWindow::MouseAction(int dx, int dy)
+{
+	DebugFunction();
+	
+	if ( dx==0 && dy==0 )
+		return;
+	
+	int x, y;
+	getMousPos(x, y);
+	x+=dx*iCursorStep;
+	y+=dy*iCursorStep;
+	if (x < 0) x=0;
+	if (x > in_width) x=in_width;
+	if (y < 0) y=0;
+	if (y > in_height) y=in_height;
+	setMousPos(x, y);
+	
+	SDL_PrivateMouseMotion(iMouseKeyState, 0, x, y);
 }
 
 #ifdef OMEGA_SUPPORT

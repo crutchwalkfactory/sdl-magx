@@ -27,9 +27,13 @@ extern int in_dbpp;
 #define vo_pixel_size bppToPixelSize(vo_dbpp)
 #define in_pixel_size bppToPixelSize(in_dbpp)
 
-///Size of screen
+///Size of HW screen
 #define p_height (fb_orig_vinfo.yres)
 #define p_width (fb_orig_vinfo.xres)
+
+///Size of virtual screen
+extern int in_height;
+extern int in_width;
 
 #define uIPUMemSize (pp_desc.size)
 
@@ -71,5 +75,6 @@ extern char * pixels();
 void setMousPos( int x, int y );
 void getMousPos( int &x, int &y );
 void setShowCursor( bool show );
+void setCanUseCursor( bool use );
 
 #endif

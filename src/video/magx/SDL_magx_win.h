@@ -41,10 +41,12 @@ public:
     void focusOutEvent( QFocusEvent * );
 
 private:
-	int keyUp();
-	int keyDown();
-	int keyLeft();
-	int keyRight();
+	void CargarTeclas();
+
+	int keyUp(int pressed);
+	int keyDown(int pressed);
+	int keyLeft(int pressed);
+	int keyRight(int pressed);
 
 	//Omega
 	#ifdef OMEGA_SUPPORT
@@ -58,11 +60,15 @@ private:
 		EZX_RIGHT_BUTTON = 2,
 	};
 	void QueueKey(QKeyEvent *e, int pressed);
+	void MouseAction(int dx, int dy);
 
 	bool bMySpecial;
 	QCopChannel *inCallChannel,*ounCallChannel;
 	SDL_keysym keyLast;
 	bool bLastMod;
+	bool bControlCursor;
+	int iCursorStep;
+	int iMouseKeyState;
 	
 	screenRotationT rot;
 };

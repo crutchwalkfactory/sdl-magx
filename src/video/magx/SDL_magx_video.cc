@@ -144,13 +144,14 @@ extern "C"
 	{
 		DebugFunction();
 		
+		preinit(); //Preinit graphics kernel
+		
 		// Create the window
 		SDL_MainWin = new SDL_MainWindow();
 		qApp->setMainWidget(SDL_MainWin);
 		SDL_MainWin->show();
 
 		//Init graphic out
-		preinit();
 		if ( !initFB() )
 		{
 			SDL_SetError("Can not init FB!");
