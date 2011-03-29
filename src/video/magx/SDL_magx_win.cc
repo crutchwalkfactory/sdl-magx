@@ -536,12 +536,8 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 
 	if ( scancode == 9999 ) 
 	{ 
-		if (bMySpecial == false) 
-		{ 
-			if(pressed) bMySpecial = true; else bMySpecial = false;
-			} else{
-			if(pressed) bMySpecial = false; else bMySpecial = true;
-		}
+		if (!pressed) 
+			bMySpecial = !bMySpecial;
 		scancode = SDLK_UNKNOWN;       
 	} 
 
