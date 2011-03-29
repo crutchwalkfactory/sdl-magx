@@ -154,6 +154,15 @@ static int MAGXAudio_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	if ( volume>0 )
 	{
 		id = AAL_open( &config );
+		if ( id==0 ) //Fail open AAL
+		{
+			printf("MAGX_AO: Try open with d2 for Z6 (d2<0xE0)\n");
+			//Try open with d2 for Z6 (d2<0xE0)
+			config.d2 = 0xB;
+			id = AAL_open( &config );
+		}
+		if (id==0)
+			printf("MAGX_AO: Error on open AAL device!\n");
 		AAL_sync(id);
 	} else
 		id=0;
@@ -234,8 +243,8 @@ static void MAGXAudio_CloseAudio(_THIS)
 	}
 	if ( id )
 	{
-		AAL_close(id);
 		AAL_sync(id);
+		AAL_close(id);
 		id=0;
 	}
 }

@@ -359,6 +359,9 @@ int configureIPU( uint32_t width, uint32_t height, uint32_t in_bpp, uint16_t in_
 		}
 
 		vo_init|=VO_ALLOC_IPU_BUF;
+	} else
+	{
+		pp_dma_buffer = NULL;
 	}
 	
 	return 1;
@@ -609,9 +612,10 @@ bool initDoubleBuffer()
 	unsigned int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);	
 	pp_dma_buffer_addr = ipu_malloc( size );
 	
-	if ( pp_dma_buffer_addr==0 )
+	if ( pp_dma_buffer_addr<=0 )
 	{
 		printf("MAGX_VO: No memory for DB\n");
+		pp_dma_buffer = NULL;		
 		return 0;
 	}
 	
@@ -621,6 +625,7 @@ bool initDoubleBuffer()
 	if (pp_dma_buffer == MAP_FAILED) 
 	{
 		fprintf(stderr,"MAGX_VO: mmap IPU\n");
+		pp_dma_buffer = NULL;
 		return 0;
 	}
 	memset(pp_dma_buffer, 0, size);

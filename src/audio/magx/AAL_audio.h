@@ -6,7 +6,7 @@
 typedef struct
 {  
     unsigned char d1;     // = 0
-    unsigned int  d2;     // = 0x4080803
+    unsigned int  d2;     // = 0x4080803  (Z6 < 0xE0)
     unsigned int  d3;     // = 0
     unsigned int  chanel; // 0 - mono, 1 -stereo
     short int     vol;    // = 0-100
