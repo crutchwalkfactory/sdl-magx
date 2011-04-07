@@ -134,7 +134,7 @@ int initFB()
 	if ((fb_dev_fd = open("/dev/fb/0", O_RDWR)) == -1) 
 	{
 		printf("MAGX_VO: Can't open /dev/fb/0: %s\n", strerror(errno));
-		goto err_out;
+		return 0;
 	}
 
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) 
@@ -167,8 +167,6 @@ int initFB()
 err_out_fd:
 	close(fb_dev_fd);
 	fb_dev_fd = -1;
-	
-err_out:
 	return 0;	
 }
 
@@ -426,12 +424,6 @@ void uninitIPU()
 {
 	DebugFunction();
 	
-	if ( vo_init&VO_INIT_IPU )
-	{		
-		if (ioctl(fd_pp, PP_IOCTL_UNINIT, NULL) < 0)
-			perror("MAGX_VO: PP_IOCTL_UNINIT");
-		vo_init^=VO_INIT_IPU;
-	}
 	if ( pp_dma_buffer )
 	{
 		int size = IPU_MEM_ALIGN(in_width*in_height*in_pixel_size);
@@ -460,6 +452,13 @@ void uninit()
 	
 	if (vo_init==0)
 		return;
+	
+	if ( vo_init&VO_INIT_IPU )
+	{		
+		if (ioctl(fd_pp, PP_IOCTL_UNINIT, NULL) < 0)
+			perror("MAGX_VO: PP_IOCTL_UNINIT");
+		vo_init^=VO_INIT_IPU;
+	}
 	
 	uninitIPU();
 	
