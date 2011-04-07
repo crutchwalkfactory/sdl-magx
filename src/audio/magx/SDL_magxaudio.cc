@@ -158,7 +158,12 @@ static int MAGXAudio_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		{
 			printf("MAGX_AO: Try open with d2 for Z6 (d2<0xE0)\n");
 			//Try open with d2 for Z6 (d2<0xE0)
-			config.d2 = 0xB;
+			
+			//Priority 0xAABB: (BB<0xA) 
+			// - (AA==0x3) -> 0xE0 
+			// - (AA==0x5) -> 0xCB 
+			// - (AA!=0x5) -> 0x81 
+			config.d2 = 0x81; 
 			id = AAL_open( &config );
 		}
 		if (id==0)
@@ -174,6 +179,7 @@ static int MAGXAudio_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	aalBuf.buffer = (void *) SDL_AllocAudioMem(aalBuf.length);
 	if ( aalBuf.buffer == NULL )
 	{
+		printf("MAGX_AO: Error alloc buffer!\n");
 		return(-1);
 	}
 	SDL_memset(aalBuf.buffer, spec->silence, spec->size);

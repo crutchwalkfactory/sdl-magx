@@ -37,14 +37,14 @@ extern "C"
 	{
 		DebugFunction();
 		
-		return -1;
+		return 0;
 	}
 
 	SDL_GrabMode MAGX_GrabInput(_THIS, SDL_GrabMode mode) 
 	{
 		DebugFunction();
 		
-		return SDL_GRAB_ON;
+		return mode;
 	}
 
 	struct WMcursor 
@@ -93,7 +93,7 @@ extern "C"
 
 	void MAGX_PumpEvents(_THIS)
 	{
-		DebugFunction();
+		//DebugFunction();
 		
 		if( !qApp ) 
 			return; 

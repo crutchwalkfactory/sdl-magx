@@ -132,6 +132,9 @@ extern "C"
 		device->free = MAGX_DeleteDevice;
 		device->ToggleFullScreen = MAGX_ToggleFullScreen;
 
+		// Set the driver flags
+		device->handles_any_size = 0;
+
 		return device;
 	}
 
@@ -241,22 +244,24 @@ extern "C"
 							int width, int height, int bpp, Uint32 flags)
 	{
 		printf("MAGX_VO: SetVideoMode width=%d height=%d bpp=%d\n", width, height, bpp);
-	
+
+		static int setVideoMode=0;
+		if ( setVideoMode && width==in_width && height==in_height && bpp==in_dbpp )
+			return (current);
+
 		if ( flags&SDL_OPENGL ) 
 		{
-			SDL_SetError("OpenGL not supported");
+			printf("MAGX_VO: OpenGL not supported");
 			return(NULL);
 		} 
 		
 		if ( (width>640 && height>480) || (width>480 && height>640) || (bpp<16) )
 		{
-			SDL_SetError("No supportet video mode!");
+			printf("MAGX_VO: No supportet video mode!");
 			return(NULL);		
 		}
 
-		static int setVideoMode=1;
-		
-		if ( setVideoMode )
+		if ( !setVideoMode )
 		{
 			//set video mode
 			if ( bpp >= 24 )
@@ -264,21 +269,21 @@ extern "C"
 			setBppFB(bpp);
 			if ( !configureIPU(width, height, bpp, screenRotation) )
 			{
-				SDL_SetError("No configure IPU!");
+				printf("MAGX_VO: No configure IPU!");
 				return(NULL);				
 			}
 			if ( flags&SDL_DOUBLEBUF )
 				initDoubleBuffer();
 			
-			setVideoMode=0;
+			setVideoMode=1;
 		} else
 		{
 			//change video mode
 			setBppFB(bpp);
 			if ( !reconfigureIPU(width, height, bpp, screenRotation) )
 			{
-				SDL_SetError("No reconfigure IPU!");
-				return(NULL);				
+				printf("MAGX_VO: No reconfigure IPU!\n");
+				return(NULL);	
 			}
 			if ( flags&SDL_DOUBLEBUF )
 				initDoubleBuffer();
@@ -302,7 +307,7 @@ extern "C"
 		else
 			current->flags |= SDL_SWSURFACE;
 			
-		if ( flags&SDL_DOUBLEBUF || mode==0 )	
+		if ( !(flags&SDL_DOUBLEBUF) && mode==0 )	
 			_this->UpdateRects = MAGX_NoUpdate;
 		else
 			_this->UpdateRects = MAGX_NormalUpdate;
@@ -398,6 +403,8 @@ extern "C"
 			flipPage();
 		else
 			SkipedFirstFlip=1;
+			
+		return 0;
 	}
 	
 	// Various screen update functions available
