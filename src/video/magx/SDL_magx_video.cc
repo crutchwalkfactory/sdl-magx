@@ -174,17 +174,21 @@ extern "C"
 		// Show logo
 		// logo: 230x150 2bpp
 		setBppFB( 16 );
-		memset(pixels(), 255, p_height*p_width*2);
-		char * pCur = pixels()+(p_height-150)*p_width+(p_width-230);
-		char * pLogo = (char*)sdlLogo+230*149*2;
-		for ( int i=0; i<150; i++ )
+		ZConfig mySDL(QString(qApp->argv()[0])+"_SDL.cfg", false);
+		if ( mySDL.readBoolEntry("SYSTEM", "ShowLogo", 1) )
 		{
-			memcpy(pCur, pLogo, 2*230);
-			pLogo -= 2*230;
-			pCur += 2*p_width;
+			memset(pixels(), 255, p_height*p_width*2);
+			char * pCur = pixels()+(p_height-150)*p_width+(p_width-230);
+			char * pLogo = (char*)sdlLogo+230*149*2;
+			for ( int i=0; i<150; i++ )
+			{
+				memcpy(pCur, pLogo, 2*230);
+				pLogo -= 2*230;
+				pCur += 2*p_width;
+			}
+			sleep(1);
 		}
-		sleep(1);
-			
+		
 		// Determine the screen depth
 		vformat->BitsPerPixel = 16; //Default screen bpp 24, best 16
 		vformat->BytesPerPixel = 2;
