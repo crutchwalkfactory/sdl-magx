@@ -70,9 +70,9 @@ void SDL_MainWindow::CargarTeclas()
 	}
 	
 	ZConfig * keyCFG;
-	if ( QFile::exist("/mmc/mmca1/games/lib/keyconfig.cfg") )
+	if ( QFile::exists("/mmc/mmca1/games/lib/keyconfig.cfg") )
 		keyCFG = new ZConfig("/mmc/mmca1/games/lib/keyconfig.cfg", false);
-	else if ( QFile::exist("/ezxlocal/download/mystuff/games/lib/keyconfig.cfg") )
+	else if ( QFile::exists("/ezxlocal/download/mystuff/games/lib/keyconfig.cfg") )
 		keyCFG = new ZConfig("/ezxlocal/download/mystuff/games/lib/keyconfig.cfg", false);
 	else
 		keyCFG = new ZConfig("/usr/mlib/SDL/keyconfig.cfg", false);
@@ -506,7 +506,9 @@ void SDL_MainWindow::QueueKey(QKeyEvent *e, int pressed)
 		case KEYCODE_POUND:
 			scancode = bMySpecial ? SmyNUMERAL : myNUMERAL;
 			break;
-
+		case KEYCODE_LOCK:
+			exit(0);
+			break;
 		#ifdef OMEGA_SUPPORT
 		case KEYCODE_OMG_TOUCH:
 			printf("OMG_TOUCH\n");
